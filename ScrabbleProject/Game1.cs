@@ -1,7 +1,16 @@
-﻿using System.Formats.Tar;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-internal class ScrabbleGame
+namespace ScrabbleProject;
+
+public class Game1 : Game
 {
+    private GraphicsDeviceManager _graphics;
+    private SpriteBatch _spriteBatch;
+
+    public Vector2 windowSize = new Vector2(1280, 720);
+
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
     char[,] board = new char[15, 15];
@@ -16,6 +25,19 @@ internal class ScrabbleGame
         {
             this.type = type;
             this.multiplier = multiplier;
+        }
+        public override string ToString()
+        {
+            string result = "";
+            if(multiplier == 2)
+                result += "D";
+            else if(multiplier == 3)
+                result += "T";
+            if(type == BonusType.Letter)
+                result += "L";
+            else if(type == BonusType.Word)
+                result += "W";
+            return result;
         }
     }
     static Bonus DL = new Bonus(BonusType.Letter, 2);
@@ -50,8 +72,16 @@ internal class ScrabbleGame
     int[] numTilesForEachLetter =   {9, 2, 2, 4,12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
     int[] pointsForEachLetter =     {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3,10, 1, 1, 1, 1, 4, 4, 8, 4,10, 0};
     char[] tileBag;
+    SpriteFont font;
 
-    ScrabbleGame()
+    public Game1()
+    {
+        _graphics = new GraphicsDeviceManager(this);
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
+
+    protected override void Initialize()
     {
         int numTiles = 0;
         for(int i = 0; i < numTilesForEachLetter.Length; i++)
@@ -72,25 +102,51 @@ internal class ScrabbleGame
                 numTiles--;
             }
         }
+
+        //If you have not used graphics yet, then using GraphicsDevice will crash the game. Calling ApplyChanges() prevents this.
+        if(GraphicsDevice == null)
+            _graphics.ApplyChanges();
+
+        //Set window resolution
+        _graphics.PreferredBackBufferWidth = (int)windowSize.X;
+        _graphics.PreferredBackBufferHeight = (int)windowSize.Y;
+        _graphics.ApplyChanges();
+
+        base.Initialize();
     }
 
-    static void Main(string[] args)
+    protected override void LoadContent()
     {
-        ScrabbleGame scrabble = new ScrabbleGame();
-        for(int i = 0; i < scrabble.bonuses.GetLength(0); i++)
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        font = Content.Load<SpriteFont>("Fonts/CourierNew24");
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
+
+        // TODO: Add your update logic here
+
+        base.Update(gameTime);
+    }
+
+    protected override void Draw(GameTime gameTime)
+    {
+        GraphicsDevice.Clear(Color.CornflowerBlue);
+
+        _spriteBatch.Begin();
+        Vector2 boardPos = new Vector2(windowSize.X / 2 - 40 * board.GetLength(0) / 2, windowSize.Y / 2 - 40 * board.GetLength(1) / 2);
+        for(int i = 0; i < bonuses.GetLength(0); i++)
         {
-            for(int j = 0; j < scrabble.bonuses.GetLength(1); j++)
+            for(int j = 0; j < bonuses.GetLength(1); j++)
             {
-                Console.Write(scrabble.bonuses[i, j].multiplier + " ");
+                _spriteBatch.DrawString(font, bonuses[i, j].ToString(), boardPos + new Vector2(40 * i, 40 * j), Color.Black);
             }
-            Console.WriteLine();
         }
+        _spriteBatch.End();
 
-        Console.WriteLine("\n");
-
-        for(int i = 0; i < scrabble.tileBag.Length; i++)
-        {
-            Console.Write(scrabble.tileBag[i] + " ");
-        }
+        base.Draw(gameTime);
     }
 }
