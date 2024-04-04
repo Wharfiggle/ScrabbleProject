@@ -62,8 +62,8 @@ public class Game1 : Game
         {nb,TL,nb,nb,nb,TL,nb,nb,nb,TL,nb,nb,nb,TL,nb},
         {nb,nb,nb,nb,DW,nb,nb,nb,nb,nb,DW,nb,nb,nb,nb},
         {DL,nb,nb,DW,nb,nb,nb,DL,nb,nb,nb,DW,nb,nb,DL},
-        {nb,nb,DW,nb,nb,nb,DL,nb,DL,nb,nb,DL,DW,nb,nb},
-        {nb,DW,nb,nb,nb,TL,nb,nb,nb,TL,nb,DL,nb,DW,nb},
+        {nb,nb,DW,nb,nb,nb,DL,nb,DL,nb,nb,nb,DW,nb,nb},
+        {nb,DW,nb,nb,nb,TL,nb,nb,nb,TL,nb,nb,nb,DW,nb},
         {TW,nb,nb,DL,nb,nb,nb,TW,nb,nb,nb,DL,nb,nb,TW}
     };
 
@@ -138,11 +138,11 @@ public class Game1 : Game
 
         _spriteBatch.Begin();
         Vector2 boardPos = new Vector2(windowSize.X / 2 - 40 * board.GetLength(0) / 2, windowSize.Y / 2 - 40 * board.GetLength(1) / 2);
-        for(int i = 0; i < bonuses.GetLength(0); i++)
+        for(int y = 0; y < bonuses.GetLength(0); y++)
         {
-            for(int j = 0; j < bonuses.GetLength(1); j++)
+            for(int x = 0; x < bonuses.GetLength(1); x++)
             {
-                _spriteBatch.DrawString(font, bonuses[i, j].ToString(), boardPos + new Vector2(40 * i, 40 * j), Color.Black);
+                _spriteBatch.DrawString(font, bonuses[y, x].ToString(), boardPos + new Vector2(40 * x, 40 * y), Color.Black);
             }
         }
         _spriteBatch.End();
