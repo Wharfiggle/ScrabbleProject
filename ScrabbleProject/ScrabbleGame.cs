@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ScrabbleProject;
@@ -97,14 +99,39 @@ public class ScrabbleGame
 
     public virtual void Draw(GameTime gameTime, SpriteBatch _spriteBatch)
     {
-        Vector2 boardPos = new Vector2(game.windowSize.X / 2 - 40 * board.GetLength(0) / 2, game.windowSize.Y / 2 - 40 * board.GetLength(1) / 2);
+        int tileSize = 40;
+        int lineThickness = 3;
+        Vector2 boardPos = new Vector2(game.windowSize.X / 2 - tileSize * board.GetLength(0) / 2, game.windowSize.Y / 2 - tileSize * board.GetLength(1) / 2);
         for(int y = 0; y < bonuses.GetLength(0); y++)
         {
             for(int x = 0; x < bonuses.GetLength(1); x++)
             {
-                _spriteBatch.DrawString(game.font, bonuses[y, x].ToString(), boardPos + new Vector2(40 * x, 40 * y), Color.Black);
+                Vector2 tilePos = boardPos + new Vector2(tileSize * x, tileSize * y);
+                
+                //draw colored rectangle
+                string bonus = bonuses[y, x].ToString();
+                Color squareColor = new Color(244, 230, 209);
+                if(bonus == "DW")
+                    squareColor = new Color(233, 167, 151);
+                else if(bonus == "DL")
+                    squareColor = new Color(173, 187, 187);
+                else if(bonus == "TW")
+                    squareColor = new Color(160, 51, 54);
+                else if(bonus == "TL")
+                    squareColor = new Color(101, 111, 124);
+                game.DrawRect(tilePos, new Vector2(tileSize, tileSize), false, -3, true, squareColor);
+                
+                //draw bonus text label
+                game.DrawStringCentered(game.fonts[3], bonus, tilePos + new Vector2(tileSize / 2, tileSize / 2), Color.White);
+                
+                //draw square border lines
+                game.DrawLine(tilePos, tilePos + new Vector2(tileSize, 0), lineThickness, new Color(115, 76, 35));
+                game.DrawLine(tilePos, tilePos + new Vector2(0, tileSize), lineThickness, new Color(115, 76, 35));
+                if(x == bonuses.GetLength(0) - 1) //draw right lines
+                    game.DrawLine(tilePos + new Vector2(tileSize, tileSize), tilePos + new Vector2(tileSize, 0), lineThickness, new Color(115, 76, 35));
+                if(y == bonuses.GetLength(1) - 1) //draw bottom lines
+                    game.DrawLine(tilePos + new Vector2(tileSize, tileSize), tilePos + new Vector2(0, tileSize), lineThickness, new Color(115, 76, 35));
             }
         }
-
     }
 }

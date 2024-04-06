@@ -15,29 +15,13 @@ public class GameObject
     Game1 game;
     public bool loaded = false;
 
-    public GameObject()
-    {
-        this.spritePath = "";
-        this.pos = new Vector2(0, 0);
-        this.size = new Vector2(-1, -1);
-        this.color = Color.White;
-        this.centerOrigin = false;
-    }
-    public GameObject(string spritePath, Vector2 pos)
+    public GameObject(string spritePath = "", Vector2 pos = default, bool centerOrigin = false, Vector2 size = default, Color color = default)
     {
         this.spritePath = spritePath;
         this.pos = pos;
-        this.size  = new Vector2(-1, -1);
-        this.color = Color.White;
-        this.centerOrigin = false;
-    }
-    public GameObject(string spritePath, Vector2 pos, bool centerOrigin, Vector2 size, Color color)
-    {
-        this.spritePath = spritePath;
-        this.pos = pos;
+        this.centerOrigin = centerOrigin;
         this.size = size;
         this.color = color;
-        this.centerOrigin = centerOrigin;
     }
 
     public void SetGameReference(Game1 game)
@@ -48,9 +32,9 @@ public class GameObject
     public virtual void LoadContent(ContentManager Content)
     {
         sprite = Content.Load<Texture2D>(spritePath);
-        if(size.X == -1)
+        if(size.X == 0)
             size.X = sprite.Bounds.Width;
-        else if(size.Y == -1)
+        else if(size.Y == 0)
             size.Y = sprite.Bounds.Height;
         loaded = true;
     }

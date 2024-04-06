@@ -27,17 +27,17 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/CourierNew14.spritefont
 
-#begin Fonts/CourierNew14.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:Fonts/CourierNew14.spritefont
-
 #begin Fonts/CourierNew24.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:Fonts/CourierNew24.spritefont
+
+#begin Fonts/LucidaSansTypewriter20.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/LucidaSansTypewriter20.spritefont
 
