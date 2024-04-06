@@ -1,4 +1,0 @@
-Type "dotnet mgcb-editor" in vscode to run the editor.
-Then do file > open and open ScrabbleProject\Content\Content.mgcb to edit the project.
-
-MGCB Editor lets you add things like sprites, new fonts, etc to the project.
