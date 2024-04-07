@@ -17,6 +17,7 @@ public class GameObject
     public Color color;
     private bool hovered = false;
     private bool clicked = false;
+    private bool held = false;
 
     //constructor
     public GameObject(string spritePath = "", Vector2 pos = default, bool centerOrigin = false, Vector2 size = default, Color color = default)
@@ -91,10 +92,14 @@ public class GameObject
 
         //sets clicked to true if hovered is true and the left mouse button was just clicked, false otherwise.
         clicked = hovered && game.GetMousePressed();
+
+        //sets held to true if hovered is true and the left mouse button is being held, false otherwise.
+        held = hovered && game.GetMouseHeld();
     }
 
-    public bool isHovered() { return hovered; }
-    public bool isClicked() { return clicked; }
+    public bool IsHovered() { return hovered; }
+    public bool IsClicked() { return clicked; }
+    public bool IsHeld() { return held; }
 
     //called during game's Draw
     public virtual void Draw(GameTime gameTime, SpriteBatch _spriteBatch)

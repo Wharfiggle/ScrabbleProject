@@ -13,7 +13,7 @@ public class RackTile : Tile
     {
         base.Update(gameTime);
 
-        if(isClicked())
+        if(IsClicked())
             pickedUp = !pickedUp;
         
         if(pickedUp)
