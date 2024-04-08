@@ -6,14 +6,18 @@ using ScrabbleProject;
 public class RackTile : Tile
 {
     public bool pickedUp = false;
+    private int player = -1;
     
-    public RackTile(char letter) : base(letter) {}
+    public RackTile(char letter, int player) : base(letter)
+    {
+        this.player = player;
+    }
 
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
 
-        if(IsClicked())
+        if(IsClicked() && game.scrabble.playerTurn == player)
             pickedUp = !pickedUp;
         
         if(pickedUp)

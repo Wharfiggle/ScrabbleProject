@@ -10,7 +10,7 @@ public class ScrabbleGame
     Game1 game;
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
     public int playerTurn = 0;
-    public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[2];
+    public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[4];
     public Vector2 rackSize = new Vector2(600, 80);
     public int rackTileSize = -1;
 
@@ -98,6 +98,14 @@ public class ScrabbleGame
                     tileBag.Add('?'); //blank tiles
             }
         }
+
+        for(int i = 0; i < board.GetLength(0); i++)
+        {
+            for(int j = 0; j < board.GetLength(1); j++)
+            {
+                board[i, j] = new Tile(' ');
+            }
+        }
     }
 
     //called during game's Initialize
@@ -112,7 +120,7 @@ public class ScrabbleGame
             {
                 int rn = rand.Next(0, tileBag.Count);
 
-                RackTile tile = new RackTile(tileBag[rn]);
+                RackTile tile = new RackTile(tileBag[rn], i);
                 game.AddGameObject(tile);
                 playerRacks[i].AddLast(tile);
                 tileBag.RemoveAt(rn);
