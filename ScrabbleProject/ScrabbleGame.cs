@@ -10,14 +10,16 @@ public class ScrabbleGame
     Game1 game;
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
     public int playerTurn = 0;
-    public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[4];
+    public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[2];
     public Vector2 rackSize = new Vector2(600, 80);
     public int rackTileSize = -1;
+    public List<RackTile> incomingWord = new List<RackTile>();
 
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
     public Tile[,] board = new Tile[15, 15];
     public int squareSize = 35;
+    public Vector2 boardPos;
 
     //Info for board spot bonuses
     public enum BonusType {Letter, Word, None}
@@ -99,11 +101,14 @@ public class ScrabbleGame
             }
         }
 
+        boardPos = new Vector2(game.GetWindowSize().X / 2 - squareSize * board.GetLength(0) / 2, game.GetWindowSize().Y / 2 - squareSize * board.GetLength(1) / 2);
+
         for(int i = 0; i < board.GetLength(0); i++)
         {
             for(int j = 0; j < board.GetLength(1); j++)
             {
                 board[i, j] = new Tile(' ');
+                board[i, j].SetPos(new Vector2(boardPos.X + squareSize * j + squareSize / 2, boardPos.Y + squareSize * i + squareSize / 2));
             }
         }
     }
@@ -140,7 +145,6 @@ public class ScrabbleGame
     public void Draw(GameTime gameTime, SpriteBatch _spriteBatch)
     {
         int lineThickness = 3;
-        Vector2 boardPos = new Vector2(game.windowSize.X / 2 - squareSize * board.GetLength(0) / 2, game.windowSize.Y / 2 - squareSize * board.GetLength(1) / 2);
         for(int y = 0; y < bonuses.GetLength(0); y++)
         {
             for(int x = 0; x < bonuses.GetLength(1); x++)
@@ -174,13 +178,13 @@ public class ScrabbleGame
         }
 
         //draw racks
-        game.DrawRect(pos: new Vector2(game.windowSize.X / 2, rackSize.Y / 2), 
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, rackSize.Y / 2), 
             size: rackSize, centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(game.windowSize.X / 2, game.windowSize.Y - rackSize.Y / 2), 
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, game.GetWindowSize().Y - rackSize.Y / 2), 
             size: rackSize, centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(rackSize.Y / 2, game.windowSize.Y / 2), 
+        game.DrawRect(pos: new Vector2(rackSize.Y / 2, game.GetWindowSize().Y / 2), 
             size: new Vector2(rackSize.Y, rackSize.X), centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(game.windowSize.X - rackSize.Y / 2, game.windowSize.Y / 2), 
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X - rackSize.Y / 2, game.GetWindowSize().Y / 2), 
             size: new Vector2(rackSize.Y, rackSize.X), centered: true, color: Color.Brown);
     }
 
@@ -193,19 +197,19 @@ public class ScrabbleGame
             Vector2 tilePos = new Vector2(0, 0);
             if(i < 2) //bottom and top
             {
-                tilePos.X = game.windowSize.X / 2 - rackSize.X / 2;
+                tilePos.X = game.GetWindowSize().X / 2 - rackSize.X / 2;
                 if(i == 0) //bottom
-                    tilePos.Y = game.windowSize.Y - rackSize.Y / 2.5f;
+                    tilePos.Y = game.GetWindowSize().Y - rackSize.Y / 2.5f;
                 else //top
                     tilePos.Y = rackSize.Y / 2.5f;
             }
             else //left and right
             {
-                tilePos.Y = game.windowSize.Y / 2 - rackSize.X / 2;
+                tilePos.Y = game.GetWindowSize().Y / 2 - rackSize.X / 2;
                 if(i == 2) //left
                     tilePos.X = rackSize.Y / 2.5f;
                 else //right
-                    tilePos.X = game.windowSize.X - rackSize.Y / 2.5f;
+                    tilePos.X = game.GetWindowSize().X - rackSize.Y / 2.5f;
             }
 
             LinkedListNode<RackTile> node = playerRacks[i].First;

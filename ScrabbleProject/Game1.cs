@@ -13,8 +13,8 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    public Vector2 windowSize = new Vector2(960, 720);
-    public List<GameObject> gameObjects = new List<GameObject>();
+    private Vector2 windowSize = new Vector2(960, 720);
+    private List<GameObject> gameObjects = new List<GameObject>();
     private bool loaded = false;
     public ScrabbleGame scrabble;
     public List<SpriteFont> fonts = new List<SpriteFont>();
@@ -58,6 +58,12 @@ public class Game1 : Game
         if(loaded && !gameObject.loaded)
             gameObject.LoadContent(Content);
     }
+    //remove GameObject from list of GameObjects
+    public void RemoveGameObject(GameObject gameObject) { gameObjects.Remove(gameObject); }
+    public void RemoveGameObjectAt(int ind) { gameObjects.RemoveAt(ind); }
+    public List<GameObject> GetGameObjects() { return gameObjects; }
+
+    public Vector2 GetWindowSize() { return windowSize; }
 
     protected override void Initialize()
     {
