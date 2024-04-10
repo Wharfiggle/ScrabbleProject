@@ -2,24 +2,18 @@ using System;
 using System.Collections.Generic;
 
 public class TrieNode {
-    private bool isSuccessState {get; set;}
-    private char letter;
-    private List<TrieNode> children {get;} 
+    public bool isSuccessState {get; set;} = false;
+    
+    public Dictionary<char, TrieNode> children {get;} = new Dictionary<char, TrieNode>();
 
-    public TrieNode(char letter) {
-        this.letter = letter;
-        isSuccessState = false;
-        children = new List<TrieNode>();
-    }
 
-    public TrieNode(char letter, bool successState) {
-        this.letter = letter;
-        isSuccessState = successState;
-        children = new List<TrieNode>();
-    }
-
-    public void addChild(TrieNode newChild) {
-        children.Add(newChild);
+    public void AddChild(TrieNode newChild, char letter) {
+        try
+        {
+        children.Add(letter, newChild);
+        } catch (ArgumentException) {
+            Console.WriteLine("An element is alerady mapped to letter: " + letter);
+        }
     }
 
 }
