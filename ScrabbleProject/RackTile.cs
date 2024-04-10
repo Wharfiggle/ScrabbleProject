@@ -9,7 +9,6 @@ public class RackTile : Tile
     public bool pickedUp = false;
     private int player = -1;
     private Vector2 putbackPos;
-    public Point boardSpot = new Point(-1, -1);
     
     public RackTile(char letter, int player) : base(letter)
     {

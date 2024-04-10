@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -9,12 +11,15 @@ using ScrabbleProject;
 public class ScrabbleGame
 {
     Game1 game;
+    //list of valid english words recognized by scrabble
+    public string[] allPossibleWords;
+
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
     public int playerTurn = 0;
     public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[2];
     public Vector2 rackSize = new Vector2(600, 80);
     public int rackTileSize = -1;
-    public List<RackTile> incomingWord = new List<RackTile>();
+    public List<Tile> incomingWord = new List<Tile>();
 
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
@@ -85,13 +90,14 @@ public class ScrabbleGame
     public ScrabbleGame(Game1 game)
     {
         this.game = game;
-
+        
+        //get total number of tiles to go in tileBag
         int numTiles = 0;
         for(int i = 0; i < numTilesForEachLetter.Length; i++)
         {
             numTiles += numTilesForEachLetter[i];
         }
-
+        //add tiles to tileBag based on numTilesForEachLetter
         for(int i = 0; i < numTilesForEachLetter.Length; i++)
         {
             for(int j = 0; j < numTilesForEachLetter[i]; j++)
@@ -103,6 +109,7 @@ public class ScrabbleGame
             }
         }
 
+        //set position to draw the board at
         boardPos = new Vector2(game.GetWindowSize().X / 2 - squareSize * board.GetLength(0) / 2, game.GetWindowSize().Y / 2 - squareSize * board.GetLength(1) / 2);
 
         for(int i = 0; i < board.GetLength(0); i++)
@@ -111,8 +118,17 @@ public class ScrabbleGame
             {
                 board[i, j] = new Tile(' ');
                 board[i, j].SetPos(new Vector2(boardPos.X + squareSize * j + squareSize / 2, boardPos.Y + squareSize * i + squareSize / 2));
+                board[i, j].boardSpot = new Point(i, j);
                 game.AddGameObject(board[i, j]);
             }
+        }
+
+        //read text file with word data and parse into allPossibleWords array
+        string[] tempWords = File.ReadAllLines("../../../Content/Collins Scrabble Words (2019).txt");
+        allPossibleWords = new string[tempWords.Length - 2];
+        for(int i = 2; i < tempWords.Length; i++) //chop off first two lines since they're not words
+        {
+            allPossibleWords[i - 2] = tempWords[i];
         }
     }
 
@@ -139,12 +155,132 @@ public class ScrabbleGame
         UpdateRackTilePositions();
     }
 
+    private Tile[] GetAdjacentTiles(Point boardSpot)
+    {
+        Tile[] result = new Tile[4]; //{left, right, up, down}
+        if(boardSpot.X > 0)
+        {
+            Tile left = board[boardSpot.X - 1, boardSpot.Y];
+            if(left.GetLetter() != ' ')
+                result[0] = left;
+        }
+        if(boardSpot.X < board.GetLength(0) - 1)
+        {
+            Tile right = board[boardSpot.X + 1, boardSpot.Y];
+            if(right.GetLetter() != ' ')
+                result[1] = right;
+        }
+        if(boardSpot.Y > 0)
+        {
+            Tile up = board[boardSpot.X, boardSpot.Y - 1];
+            if(up.GetLetter() != ' ')
+                result[2] = up;
+        }
+        if(boardSpot.Y < board.GetLength(1) - 1)
+        {
+            Tile down = board[boardSpot.X, boardSpot.Y + 1];
+            if(down.GetLetter() != ' ')
+                result[3] = down;
+        }
+        return result;
+    }
+
+    private bool IsIncomingWordValid()
+    {
+        if(incomingWord.Count() == 0)
+            return false;
+        List<List<Tile>> wordsBuilt = new List<List<Tile>>();
+        List<bool> horizontal = new List<bool>();
+        //iterate through all placed tiles
+        for(int i = 0; i < incomingWord.Count(); i++)
+        {
+            //get tiles adjacent to current placed tile
+            Tile[] adjTiles = GetAdjacentTiles(incomingWord[i].boardSpot);
+            for(int j = 0; j < adjTiles.Length; j++)
+            {Console.WriteLine(adjTiles[j]);
+                //if we've already checked an adjacent tile, remove it from list of adjacent tiles
+                bool found = false;
+                for(int k = 0; k < wordsBuilt.Count && found == false; k++)
+                {
+                    if(wordsBuilt[k].Contains(adjTiles[j]))
+                        found = true;
+                }
+                if(found)
+                    adjTiles[j] = null;
+                //if the adjacent tile isnt in our incoming word then add it to it for word processing
+                else if(adjTiles[j] != null && !incomingWord.Contains(adjTiles[j]))
+                    incomingWord.Add(adjTiles[j]);
+            }
+
+            int foundWord = -1;
+            for(int j = 0; j < wordsBuilt.Count() && foundWord == -1; j++)
+            {
+                for(int k = 0; k < wordsBuilt[j].Count() && foundWord == -1; k++)
+                {
+                    if(wordsBuilt[j][k] == incomingWord[i])
+                        foundWord = j;
+                }
+            }
+            if(foundWord != -1 && horizontal[foundWord]) //current tile is part of a horizontal word
+            {
+                if(adjTiles[0] != null) //add left tile to start of word
+                    wordsBuilt[foundWord].Prepend(adjTiles[0]);
+                if(adjTiles[1] != null) //add right tile to end of word
+                    wordsBuilt[foundWord].Append(adjTiles[1]);
+            }
+            else if(foundWord != -1 && !horizontal[foundWord])
+            {
+                if(adjTiles[2] != null) //add top tile to start of word
+                    wordsBuilt[foundWord].Prepend(adjTiles[2]);
+                if(adjTiles[3] != null) //add bottom tile to end of word
+                    wordsBuilt[foundWord].Append(adjTiles[3]);
+            }
+            if(foundWord == -1 || !horizontal[foundWord])
+            {
+                Console.WriteLine("!");
+                if(adjTiles[0] != null || adjTiles[1] != null)
+                {
+                    Console.WriteLine("!!");
+                    wordsBuilt.Add(new List<Tile>());
+                    horizontal.Add(true);
+                    if(foundWord == -1)
+                        wordsBuilt[wordsBuilt.Count() - 1].Append(incomingWord[i]);
+                    if(adjTiles[0] != null) //add left tile to start of new word
+                        wordsBuilt[wordsBuilt.Count() - 1].Prepend(adjTiles[0]);
+                    if(adjTiles[1] != null) //add right tile to end of new word
+                        wordsBuilt[wordsBuilt.Count() - 1].Append(adjTiles[1]);
+                }
+            }
+            if(foundWord == -1 || horizontal[foundWord])
+            {
+                if(adjTiles[2] != null || adjTiles[3] != null)
+                {
+                    wordsBuilt.Add(new List<Tile>());
+                    horizontal.Add(false);
+                    if(foundWord == -1)
+                        wordsBuilt[wordsBuilt.Count() - 1].Append(incomingWord[i]);
+                    if(adjTiles[2] != null) //add top tile to start of new word
+                        wordsBuilt[wordsBuilt.Count() - 1].Prepend(adjTiles[2]);
+                    if(adjTiles[3] != null) //add bottom tile to end of new word
+                        wordsBuilt[wordsBuilt.Count() - 1].Append(adjTiles[3]);
+                }
+            }
+        }
+
+        Console.WriteLine(wordsBuilt.Count());
+        for(int i = 0; i < wordsBuilt.Count(); i++)
+        {
+            Console.WriteLine(wordsBuilt[i]);
+        }
+        return false;
+    }
+
     //called during game's Update
     public void Update(GameTime gameTime)
     {
         if(Keyboard.GetState().IsKeyDown(Keys.Enter)) //when enter is pressed, apply placed tiles and move to next turn
         {
-            if(!enterPressed && incomingWord.Count() > 0)
+            if(!enterPressed && IsIncomingWordValid())
             {
                 for(int i = 0; i < incomingWord.Count(); i++)
                 {

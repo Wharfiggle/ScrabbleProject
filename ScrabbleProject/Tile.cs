@@ -8,7 +8,8 @@ public class Tile : GameObject
     protected Color contourColor;
     protected char letter; // == ' ' if tile is empty
     protected int pointValue; // == 0 if tile is empty
-    
+    public Point boardSpot = new Point(-1, -1);
+
     public Tile(char letter) : base(centerOrigin: true, size: new Vector2(35, 35), color: new Color(206, 163, 119))
     {
         SetLetter(letter);
