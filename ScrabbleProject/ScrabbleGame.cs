@@ -19,7 +19,7 @@ public class ScrabbleGame
     public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[2];
     public Vector2 rackSize = new Vector2(600, 80);
     public int rackTileSize = -1;
-    public List<Tile> incomingWord = new List<Tile>();
+    private List<Tile> incomingWord = new List<Tile>();
 
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
@@ -155,6 +155,17 @@ public class ScrabbleGame
         UpdateRackTilePositions();
     }
 
+    public void AddToIncomingWord(RackTile rt)
+    {
+        incomingWord.Add(rt);
+        board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(rt.GetLetter());
+    }
+    public void RemoveFromIncomingWord(RackTile rt)
+    {
+        incomingWord.Remove(rt);
+        board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+    }
+
     private Tile[] GetAdjacentTiles(Point boardSpot)
     {
         Tile[] result = new Tile[4]; //{left, right, up, down}
@@ -192,12 +203,12 @@ public class ScrabbleGame
         List<List<Tile>> wordsBuilt = new List<List<Tile>>();
         List<bool> horizontal = new List<bool>();
         //iterate through all placed tiles
-        for(int i = 0; i < incomingWord.Count(); i++)
+        for(int i = 0; i < 1; i++)
         {
             //get tiles adjacent to current placed tile
             Tile[] adjTiles = GetAdjacentTiles(incomingWord[i].boardSpot);
             for(int j = 0; j < adjTiles.Length; j++)
-            {Console.WriteLine(adjTiles[j]);
+            {
                 //if we've already checked an adjacent tile, remove it from list of adjacent tiles
                 bool found = false;
                 for(int k = 0; k < wordsBuilt.Count && found == false; k++)
@@ -208,8 +219,17 @@ public class ScrabbleGame
                 if(found)
                     adjTiles[j] = null;
                 //if the adjacent tile isnt in our incoming word then add it to it for word processing
-                else if(adjTiles[j] != null && !incomingWord.Contains(adjTiles[j]))
-                    incomingWord.Add(adjTiles[j]);
+                else if(adjTiles[j] != null)
+                {
+                    found = false;
+                    for(int k = 0; k < incomingWord.Count() && found == false; k++)
+                    {
+                        if(incomingWord[k].boardSpot == adjTiles[j].boardSpot)
+                            found = true;
+                    }
+                    if(!found)
+                        incomingWord.Add(adjTiles[j]);
+                }
             }
 
             int foundWord = -1;
@@ -237,10 +257,8 @@ public class ScrabbleGame
             }
             if(foundWord == -1 || !horizontal[foundWord])
             {
-                Console.WriteLine("!");
                 if(adjTiles[0] != null || adjTiles[1] != null)
                 {
-                    Console.WriteLine("!!");
                     wordsBuilt.Add(new List<Tile>());
                     horizontal.Add(true);
                     if(foundWord == -1)
@@ -267,10 +285,16 @@ public class ScrabbleGame
             }
         }
 
-        Console.WriteLine(wordsBuilt.Count());
+        Console.WriteLine("Words: " + wordsBuilt.Count());
         for(int i = 0; i < wordsBuilt.Count(); i++)
         {
-            Console.WriteLine(wordsBuilt[i]);
+            Console.WriteLine("Word Length: " + wordsBuilt[i].Count());
+            string str = "|";
+            for(int j = 0; j < wordsBuilt[i].Count(); j++)
+            {
+                str += wordsBuilt[i][j].GetLetter();
+            }
+            Console.WriteLine(str+"|");
         }
         return false;
     }

@@ -41,19 +41,18 @@ public class RackTile : Tile
 
             if(minDistance < GetSize().X) //if there is a valid board spot to snap to
             {
-                boardSpot = bSpot; //assign board spot coordinate to this rack tile
-                SetPos(game.scrabble.board[boardSpot.X, boardSpot.Y].GetPos()); //snap to board spot
+                SetPos(game.scrabble.board[bSpot.X, bSpot.Y].GetPos()); //snap to board spot
                 if(IsClicked()) //if clicked while snapping to a board spot, place tile there
                 {
                     pickedUp = false;
-                    game.scrabble.incomingWord.Add(this); //pass rack tile to ScrabbleGame to determine if the word is valid
+                    boardSpot = bSpot; //assign board spot coordinate to this rack tile
+                    game.scrabble.AddToIncomingWord(this); //pass rack tile to ScrabbleGame to determine if the word is valid
                 }
             }
             else if(IsClicked()) //if clicked while not snapping to a board spot, return tile to rack
             {
                 pickedUp = false;
                 SetPos(putbackPos);
-                boardSpot = new Point(-1, -1);
             }
         }
         else if(IsClicked() && game.scrabble.playerTurn == player) //clicked while not picked up
@@ -62,7 +61,10 @@ public class RackTile : Tile
             if(boardSpot == new Point(-1, -1)) //if in rack when picked up
                 putbackPos = GetPos();
             else //if on board when picked up
-                game.scrabble.incomingWord.Remove(this); //remove this tile from word consideration
+            {
+                game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
+                boardSpot = new Point(-1, -1);
+            }
         }
     }
 
@@ -82,6 +84,7 @@ public class RackTile : Tile
             contourColor.A = 255;
         }
 
-        base.Draw(gameTime, _spriteBatch);
+        if(boardSpot == new Point(-1, -1))
+            base.Draw(gameTime, _spriteBatch);
     }
 }
