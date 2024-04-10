@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using ScrabbleProject;
 
 public class ScrabbleGame
@@ -20,6 +21,7 @@ public class ScrabbleGame
     public Tile[,] board = new Tile[15, 15];
     public int squareSize = 35;
     public Vector2 boardPos;
+    private bool enterPressed = false;
 
     //Info for board spot bonuses
     public enum BonusType {Letter, Word, None}
@@ -109,6 +111,7 @@ public class ScrabbleGame
             {
                 board[i, j] = new Tile(' ');
                 board[i, j].SetPos(new Vector2(boardPos.X + squareSize * j + squareSize / 2, boardPos.Y + squareSize * i + squareSize / 2));
+                game.AddGameObject(board[i, j]);
             }
         }
     }
@@ -139,6 +142,24 @@ public class ScrabbleGame
     //called during game's Update
     public void Update(GameTime gameTime)
     {
+        if(Keyboard.GetState().IsKeyDown(Keys.Enter)) //when enter is pressed, apply placed tiles and move to next turn
+        {
+            if(!enterPressed && incomingWord.Count() > 0)
+            {
+                for(int i = 0; i < incomingWord.Count(); i++)
+                {
+                    Point bs = incomingWord[i].boardSpot;
+                    board[bs.X, bs.Y].SetLetter(incomingWord[i].GetLetter());
+                    game.RemoveGameObject(incomingWord[i]);
+                }
+                incomingWord.Clear();
+                playerTurn = (playerTurn + 1) % playerRacks.Count();
+                Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
+            }
+            enterPressed = true;
+        }
+        else
+            enterPressed = false;
     }
 
     //called during game's Draw
