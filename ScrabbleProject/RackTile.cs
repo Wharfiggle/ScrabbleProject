@@ -39,6 +39,8 @@ public class RackTile : Tile
             {
                 for(int j = 0; j < game.scrabble.board.GetLength(1); j++)
                 {
+                    if(game.scrabble.board[i, j].GetLetter() != ' ')
+                        continue;
                     float dist = (game.scrabble.board[i, j].GetPos() - GetPos()).Length();
                     if(dist < minDistance)
                     {

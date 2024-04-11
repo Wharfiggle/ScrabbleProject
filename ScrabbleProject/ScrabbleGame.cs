@@ -209,6 +209,9 @@ public class ScrabbleGame
         return result;
     }
 
+    //iterates through all tiles in incomingWord and updates all horWord's and vertWord's of tiles modified by them.
+    //each modified word is then checked to be a valid word. if all are valid then the function returns true,
+    //if any isnt then each modified tile is reset and the function returns false.
     private bool IsIncomingWordValid()
     {
         //list of tiles to be considered in validity, starts out with the same tiles as incomingWord
@@ -309,14 +312,32 @@ public class ScrabbleGame
                     {
                         if(board[p.X, p.Y].horWord.Count == 0){Console.WriteLine("left no hor: " + board[p.X, p.Y].GetLetter()); //hor and left no hor
                             board[ct.X, ct.Y].horWord.AddFirst(p);}
-                        else Console.WriteLine("left hor: " + board[p.X, p.Y].phorWord()); //hor and left hor
+                        else
+                        {Console.WriteLine("left hor: " + board[p.X, p.Y].phorWord()); //hor and left hor
+                            if(!board[p.X, p.Y].horWord.Contains(ct))
+                            {
+                                for(LinkedListNode<Point> node = board[p.X, p.Y].horWord.Last; node != null; node = node.Previous)
+                                {
+                                    board[ct.X, ct.Y].horWord.AddFirst(node.Value);
+                                }
+                            }
+                        }
                     }
                     p = adjTiles[1];
                     if(p.X != -1) //right exists
                     {
                         if(board[p.X, p.Y].horWord.Count == 0){Console.WriteLine("right no hor: " + board[p.X, p.Y].GetLetter()); //hor and right no hor
                             board[ct.X, ct.Y].horWord.AddLast(p);}
-                        else Console.WriteLine("right hor: " + board[p.X, p.Y].phorWord()); //hor and right hor
+                        else
+                        {Console.WriteLine("right hor: " + board[p.X, p.Y].phorWord()); //hor and right hor
+                            if(!board[p.X, p.Y].horWord.Contains(ct))
+                            {
+                                for(LinkedListNode<Point> node = board[p.X, p.Y].horWord.First; node != null; node = node.Next)
+                                {
+                                    board[ct.X, ct.Y].horWord.AddLast(node.Value);
+                                }
+                            }
+                        }
                     }
                     //now that our tile's word is accurate, update horWord for all letters in it
                     Console.WriteLine("---update horWord---: " + board[ct.X, ct.Y].phorWord());
@@ -383,14 +404,32 @@ public class ScrabbleGame
                     {
                         if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("up no vert: " + board[p.X, p.Y].GetLetter()); //vert and up no vert
                             board[ct.X, ct.Y].vertWord.AddFirst(p);}
-                        else Console.WriteLine("up vert: " + board[p.X, p.Y].pvertWord());//vert and up vert
+                        else
+                        {Console.WriteLine("up vert: " + board[p.X, p.Y].pvertWord());//vert and up vert
+                            if(!board[p.X, p.Y].vertWord.Contains(ct))
+                            {
+                                for(LinkedListNode<Point> node = board[p.X, p.Y].vertWord.Last; node != null; node = node.Previous)
+                                {
+                                    board[ct.X, ct.Y].vertWord.AddFirst(node.Value);
+                                }
+                            }
+                        }
                     }
                     p = adjTiles[3];
                     if(p.X != -1) //down exists
                     {
                         if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("down no vert: " + board[p.X, p.Y].GetLetter()); //vert and down no vert
                             board[ct.X, ct.Y].vertWord.AddLast(p);}
-                        else Console.WriteLine("down vert: " + board[p.X, p.Y].pvertWord());//vert and down vert
+                        else
+                        {Console.WriteLine("down vert: " + board[p.X, p.Y].pvertWord());//vert and down vert
+                            if(!board[p.X, p.Y].vertWord.Contains(ct))
+                            {
+                                for(LinkedListNode<Point> node = board[p.X, p.Y].vertWord.First; node != null; node = node.Next)
+                                {
+                                    board[ct.X, ct.Y].vertWord.AddLast(node.Value);
+                                }
+                            }
+                        }
                     }
                     //now that our tile's word is accurate, update vertWord for all letters in it
                     Console.WriteLine("---update vertWord---: " + board[ct.X, ct.Y].pvertWord());
@@ -479,7 +518,10 @@ public class ScrabbleGame
         }
 
         if(result)
+        {
             Console.WriteLine("All words valid!");
+            AddPointsFromWords(wordsBuilt);
+        }
         else
         {
             for(int i = 0; i < modifiedTiles.Count; i++)
@@ -491,9 +533,29 @@ public class ScrabbleGame
         return result;
     }
 
+    //takes words built from IsIncomingWordValid, calculates points, and gives them to the current player
+    private void AddPointsFromWords(List<LinkedList<Point>> wordsBuilt)
+    {
+
+    }
+
     //called during game's Update
     public void Update(GameTime gameTime)
     {
+        for(int i = 0; i < 26; i++)
+        {
+            if(Keyboard.GetState().IsKeyDown((Keys)(65 + i)))
+            {
+                foreach(Tile t in playerRacks[playerTurn])
+                {
+                    if(t.boardSpot == new Point(-1, -1))
+                    {
+                        t.SetLetter((char)('A' + i));
+                        break;
+                    }
+                }
+            }
+        }
         if(Keyboard.GetState().IsKeyDown(Keys.Enter)) //when enter is pressed, apply placed tiles and move to next turn
         {
             if(!enterPressed)
