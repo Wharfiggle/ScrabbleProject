@@ -222,7 +222,10 @@ public class ScrabbleGame
         }
 
         if(consideredTiles.Count() == 0) //return false if no tiles placed
+        {
+            Console.WriteLine("No tiles placed.");
             return false;
+        }
         
         //return false if all tiles placed are not in a straight line
         bool xChanged = false;
@@ -235,7 +238,10 @@ public class ScrabbleGame
                 yChanged = true;
         }
         if(xChanged && yChanged)
+        {
+            Console.WriteLine("Invalid placement. Not in a straight line.");
             return false;
+        }
 
         List<Point> modifiedTiles = new List<Point>();
         //iterate through all placed tiles
@@ -482,6 +488,27 @@ public class ScrabbleGame
             }
         }
 
+        //check if at least one of the tiles in the words built was already on the board or is on the center tile
+        //reset modified tiles and return false otherwise
+        bool result = false;
+        for(int i = 0; i < wordsBuilt.Count && result == false; i++)
+        {
+            foreach(Point p in wordsBuilt[i])
+            {
+                if(!consideredTiles.Contains(p) || p == new Point(board.GetLength(0) / 2, board.GetLength(1) / 2))
+                    result = true;
+            }
+        }
+        if(!result)
+        {
+            Console.WriteLine("Invalid placement.");
+            for(int i = 0; i < modifiedTiles.Count; i++)
+            {
+                board[modifiedTiles[i].X, modifiedTiles[i].Y].RestoreWords();
+            }
+            return false;
+        }
+
         //construct list of forwards and backwards strings made from our placed tiles
         List<string> stringsBuilt = new List<string>();
         for(int i = 0; i < wordsBuilt.Count(); i++)
@@ -499,7 +526,7 @@ public class ScrabbleGame
         }    
         
         //compare list of forwards and backwards strings against all possible words, if any unique string isn't found then return false
-        bool result = true;
+        result = true;
         for(int i = 0; i < stringsBuilt.Count && result == true; i += 2)
         {
             bool found = false;
