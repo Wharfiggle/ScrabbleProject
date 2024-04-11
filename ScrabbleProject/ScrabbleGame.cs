@@ -214,8 +214,7 @@ public class ScrabbleGame
             consideredTiles.Add(incomingWord[i]);
         }
 
-        int placedTiles = consideredTiles.Count();
-        if(placedTiles == 0) //return false if no tiles placed
+        if(consideredTiles.Count() == 0) //return false if no tiles placed
             return false;
         
         //return false if all tiles placed are not in a straight line
