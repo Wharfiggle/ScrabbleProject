@@ -21,6 +21,7 @@ public class ScrabbleGame
     public Vector2 rackSize = new Vector2(600, 80);
     public int rackTileSize = -1;
     private List<RackTile> incomingWord = new List<RackTile>();
+    List<LinkedList<Tile>> wordsBuilt = new List<LinkedList<Tile>>();
 
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
@@ -204,6 +205,19 @@ public class ScrabbleGame
         }
         return result;
     }
+    private bool WordsBuiltContainsTile(Tile tile)
+    {
+        bool found = false;
+        for(int i = 0; i < wordsBuilt.Count; i++)
+        {
+            foreach(Tile t in wordsBuilt[i])
+            {
+                if(t.boardSpot == tile.boardSpot)
+                    found = true;
+            }
+        }
+        return found;
+    }
 
     private bool IsIncomingWordValid()
     {
@@ -230,7 +244,7 @@ public class ScrabbleGame
         if(xChanged && yChanged)
             return false;
 
-        List<LinkedList<Tile>> wordsBuilt = new List<LinkedList<Tile>>();
+        wordsBuilt.Clear();
         List<bool> horizontal = new List<bool>();
         //iterate through all placed tiles
         for(int i = 0; i < consideredTiles.Count(); i++)
@@ -242,84 +256,76 @@ public class ScrabbleGame
                 if(adjTiles[j] == null)
                     continue;
                     
-                //if we've already checked an adjacent tile, remove it from list of adjacent tiles
+                //if the adjacent tile isnt in our considered tiles then add it to it for word processing
                 bool found = false;
-                for(int k = 0; k < wordsBuilt.Count && found == false; k++)
+                for(int k = 0; k < consideredTiles.Count() && found == false; k++)
                 {
-                    foreach(Tile tile in wordsBuilt[k])
-                    {
-                        if(tile.boardSpot == adjTiles[j].boardSpot)
-                            found = true;
-                    }
+                    if(consideredTiles[k].boardSpot == adjTiles[j].boardSpot)
+                        found = true;
                 }
-                if(found)
-                    adjTiles[j] = null;
-                //if the adjacent tile isnt in our incoming word then add it to it for word processing
-                else
-                {
-                    found = false;
-                    for(int k = 0; k < consideredTiles.Count() && found == false; k++)
-                    {
-                        if(consideredTiles[k].boardSpot == adjTiles[j].boardSpot)
-                            found = true;
-                    }
-                    if(!found)
-                        consideredTiles.Add(adjTiles[j]);
-                }
+                if(!found)
+                    consideredTiles.Add(adjTiles[j]);
             }
 
             //see what word the current placed tile is in if any
-            int foundWord = -1;
-            for(int j = 0; j < wordsBuilt.Count() && foundWord == -1; j++)
+            List<int> foundWords = new List<int>();
+            for(int j = 0; j < wordsBuilt.Count(); j++)
             {
                 foreach(Tile tile in wordsBuilt[j])
                 {
                     if(tile.boardSpot == consideredTiles[i].boardSpot)
-                        foundWord = j;
+                        foundWords.Add(j);
                 }
             }
-            if(foundWord != -1 && horizontal[foundWord]) //current tile is part of a horizontal word
+
+            do
             {
-                if(adjTiles[0] != null) //add left tile to start of word
-                    wordsBuilt[foundWord].AddFirst(adjTiles[0]);
-                if(adjTiles[1] != null) //add right tile to end of word
-                    wordsBuilt[foundWord].AddLast(adjTiles[1]);
-            }
-            else if(foundWord != -1 && !horizontal[foundWord]) //current tile is part of a vertical word
-            {
-                if(adjTiles[2] != null) //add top tile to start of word
-                    wordsBuilt[foundWord].AddFirst(adjTiles[2]);
-                if(adjTiles[3] != null) //add bottom tile to end of word
-                    wordsBuilt[foundWord].AddLast(adjTiles[3]);
-            }
-            if(foundWord == -1 || !horizontal[foundWord])
-            {
-                if(adjTiles[0] != null || adjTiles[1] != null)
+                if(foundWords.Count > 0 && horizontal[foundWords.First()]) //current tile is part of a horizontal word
                 {
-                    //add new horizontal word
-                    wordsBuilt.Add(new LinkedList<Tile>());
-                    horizontal.Add(true);
-                    wordsBuilt[wordsBuilt.Count() - 1].AddLast(consideredTiles[i]);
-                    if(adjTiles[0] != null) //add left tile to start of new word
-                        wordsBuilt[wordsBuilt.Count() - 1].AddFirst(adjTiles[0]);
-                    if(adjTiles[1] != null) //add right tile to end of new word
-                        wordsBuilt[wordsBuilt.Count() - 1].AddLast(adjTiles[1]);
+                    if(adjTiles[0] != null && !WordsBuiltContainsTile(adjTiles[0])) //add left tile to start of word
+                        wordsBuilt[foundWords.First()].AddFirst(adjTiles[0]);
+                    if(adjTiles[1] != null && !WordsBuiltContainsTile(adjTiles[1])) //add right tile to end of word
+                        wordsBuilt[foundWords.First()].AddLast(adjTiles[1]);
                 }
-            }
-            if(foundWord == -1 || horizontal[foundWord])
-            {
-                if(adjTiles[2] != null || adjTiles[3] != null)
+                else if(foundWords.Count > 0 && !horizontal[foundWords.First()]) //current tile is part of a vertical word
                 {
-                    //add new vertical word
-                    wordsBuilt.Add(new LinkedList<Tile>());
-                    horizontal.Add(false);
-                    wordsBuilt[wordsBuilt.Count() - 1].AddLast(consideredTiles[i]);
-                    if(adjTiles[2] != null) //add top tile to start of new word
-                        wordsBuilt[wordsBuilt.Count() - 1].AddFirst(adjTiles[2]);
-                    if(adjTiles[3] != null) //add bottom tile to end of new word
-                        wordsBuilt[wordsBuilt.Count() - 1].AddLast(adjTiles[3]);
+                    if(adjTiles[2] != null && !WordsBuiltContainsTile(adjTiles[2])) //add top tile to start of word
+                        wordsBuilt[foundWords.First()].AddFirst(adjTiles[2]);
+                    if(adjTiles[3] != null && !WordsBuiltContainsTile(adjTiles[3])) //add bottom tile to end of word
+                        wordsBuilt[foundWords.First()].AddLast(adjTiles[3]);
                 }
+                if(foundWords.Count == 0 || !horizontal[foundWords.First()])
+                {
+                    if(adjTiles[0] != null || adjTiles[1] != null)
+                    {
+                        //add new horizontal word
+                        wordsBuilt.Add(new LinkedList<Tile>());
+                        horizontal.Add(true);
+                        wordsBuilt[wordsBuilt.Count() - 1].AddLast(consideredTiles[i]);
+                        if(adjTiles[0] != null) //add left tile to start of new word
+                            wordsBuilt[wordsBuilt.Count() - 1].AddFirst(adjTiles[0]);
+                        if(adjTiles[1] != null) //add right tile to end of new word
+                            wordsBuilt[wordsBuilt.Count() - 1].AddLast(adjTiles[1]);
+                    }
+                }
+                if(foundWords.Count == 0 || horizontal[foundWords.First()])
+                {
+                    if(adjTiles[2] != null || adjTiles[3] != null)
+                    {
+                        //add new vertical word
+                        wordsBuilt.Add(new LinkedList<Tile>());
+                        horizontal.Add(false);
+                        wordsBuilt[wordsBuilt.Count() - 1].AddLast(consideredTiles[i]);
+                        if(adjTiles[2] != null) //add top tile to start of new word
+                            wordsBuilt[wordsBuilt.Count() - 1].AddFirst(adjTiles[2]);
+                        if(adjTiles[3] != null) //add bottom tile to end of new word
+                            wordsBuilt[wordsBuilt.Count() - 1].AddLast(adjTiles[3]);
+                    }
+                }
+                if(foundWords.Count > 0)
+                    foundWords.RemoveAt(foundWords.Count - 1);
             }
+            while(foundWords.Count() > 0);
         }
 
         //construct list of forwards and backwards strings made from our placed tiles
@@ -388,14 +394,7 @@ public class ScrabbleGame
                     for(int i = 0; i < incomingWord.Count(); i++)
                     {
                         Point bs = incomingWord[i].boardSpot;
-                        try
-                        {
-                            board[bs.X, bs.Y].SetLetter(' ');
-                        }
-                        catch(IndexOutOfRangeException e)
-                        {
-                            Console.WriteLine("\nINVALID board position: " + bs + "\n");
-                        }
+                        board[bs.X, bs.Y].SetLetter(' ');
                         incomingWord[i].PutBack();
                     }
                     incomingWord.Clear();
