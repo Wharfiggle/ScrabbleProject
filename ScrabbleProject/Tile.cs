@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ScrabbleProject;
@@ -9,10 +10,25 @@ public class Tile : GameObject
     protected char letter; // == ' ' if tile is empty
     protected int pointValue; // == 0 if tile is empty
     public Point boardSpot = new Point(-1, -1);
+    public LinkedList<Point> horWord = new LinkedList<Point>();
+    public LinkedList<Point> vertWord = new LinkedList<Point>();
+    private LinkedList<Point> backupHorWord = new LinkedList<Point>();
+    private LinkedList<Point> backupVertWord = new LinkedList<Point>();
 
     public Tile(char letter) : base(centerOrigin: true, size: new Vector2(35, 35), color: new Color(206, 163, 119))
     {
         SetLetter(letter);
+    }
+
+    public void BackupWords()
+    {
+        backupHorWord = new LinkedList<Point>(horWord);
+        backupVertWord = new LinkedList<Point>(vertWord);
+    }
+    public void RestoreWords()
+    {
+        horWord = new LinkedList<Point>(backupHorWord);
+        vertWord = new LinkedList<Point>(backupVertWord);
     }
 
     //update the point value when letterIndex is updated or when game reference is set
