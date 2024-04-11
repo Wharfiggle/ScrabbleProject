@@ -31,6 +31,27 @@ public class Tile : GameObject
         vertWord = new LinkedList<Point>(backupVertWord);
     }
 
+    //get horWord as a string for debug purposes
+    public string phorWord()
+    {
+        string result = "";
+        foreach(Point p in horWord)
+        {
+            result += game.scrabble.board[p.X, p.Y];
+        }
+        return result;
+    }
+    //get vertWord as a string for debug purposes
+    public string pvertWord()
+    {
+        string result = "";
+        foreach(Point p in vertWord)
+        {
+            result += game.scrabble.board[p.X, p.Y];
+        }
+        return result;
+    }
+
     //update the point value when letterIndex is updated or when game reference is set
     private void UpdatePointValue()
     {

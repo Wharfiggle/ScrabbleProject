@@ -257,7 +257,7 @@ public class ScrabbleGame
             }
 
             if(board[ct.X, ct.Y].horWord.Count == 0) //no hor
-            {
+            {Console.WriteLine("***no hor***: " + board[ct.X, ct.Y].GetLetter());
                 if(adjTiles[0].X != -1 || adjTiles[1].X != -1) //if this tile is connected horizontally, start building horWord
                 {
                     board[ct.X, ct.Y].horWord.AddFirst(ct);
@@ -265,10 +265,10 @@ public class ScrabbleGame
                     Point p = adjTiles[0];
                     if(p.X != -1) //left exists
                     {
-                        if(board[p.X, p.Y].horWord.Count == 0) //no hor and left no hor
-                            board[ct.X, ct.Y].horWord.AddFirst(p);
+                        if(board[p.X, p.Y].horWord.Count == 0){ Console.WriteLine("left no hor: " + board[p.X, p.Y].GetLetter()); //no hor and left no hor
+                            board[ct.X, ct.Y].horWord.AddFirst(p);}
                         else //no hor and left hor
-                        {
+                        {Console.WriteLine("left hor: " + board[p.X, p.Y].phorWord());
                             for(LinkedListNode<Point> node = board[p.X, p.Y].horWord.Last; node != null; node = node.Previous)
                             {
                                 board[ct.X, ct.Y].horWord.AddFirst(node.Value);
@@ -278,60 +278,60 @@ public class ScrabbleGame
                     p = adjTiles[1];
                     if(p.X != -1) //right exists
                     {
-                        if(board[p.X, p.Y].horWord.Count == 0) //no hor and right no hor
-                            board[ct.X, ct.Y].horWord.AddLast(p);
+                        if(board[p.X, p.Y].horWord.Count == 0){Console.WriteLine("right no hor: " + board[p.X, p.Y].GetLetter()); //no hor and right no hor
+                            board[ct.X, ct.Y].horWord.AddLast(p);}
                         else //no hor and right hor
-                        {
+                        {Console.WriteLine("right hor: " + board[p.X, p.Y].phorWord());
                             for(LinkedListNode<Point> node = board[p.X, p.Y].horWord.First; node != null; node = node.Next)
                             {
                                 board[ct.X, ct.Y].horWord.AddLast(node.Value);
                             }
                         }
                     }
-                    //now that our tile's word is accurate, update left and right words if they exist
-                    for(int j = 0; j < 2; j++)
+                    //now that our tile's word is accurate, update horWord for all letters in it
+                    Console.WriteLine("---update horWord---: " + board[ct.X, ct.Y].phorWord());
+                    foreach(Point j in board[ct.X, ct.Y].horWord)
                     {
-                        p = adjTiles[j];
-                        if(p.X != -1)
+                        if(j != ct)
                         {
-                            board[p.X, p.Y].horWord.Clear();
-                            board[p.X, p.Y].horWord = new LinkedList<Point>(board[ct.X, ct.Y].horWord);
+                            board[j.X, j.Y].horWord.Clear();
+                            board[j.X, j.Y].horWord = new LinkedList<Point>(board[ct.X, ct.Y].horWord);
                         }
                     }
                 }
             }
             else //hor
-            {
+            {Console.WriteLine("***hor***: " + board[ct.X, ct.Y].GetLetter());
                 if(adjTiles[0].X != -1 || adjTiles[1].X != -1) //if this tile is connected horizontally, update horWord
                 {
                     Point p = adjTiles[0];
                     if(p.X != -1) //left exists
                     {
-                        if(board[p.X, p.Y].horWord.Count == 0) //hor and left no hor
-                            board[ct.X, ct.Y].horWord.AddFirst(p);
-                        //else //hor and left hor
+                        if(board[p.X, p.Y].horWord.Count == 0){Console.WriteLine("left no hor: " + board[p.X, p.Y].GetLetter()); //hor and left no hor
+                            board[ct.X, ct.Y].horWord.AddFirst(p);}
+                        else Console.WriteLine("left hor: " + board[p.X, p.Y].phorWord()); //hor and left hor
                     }
                     p = adjTiles[1];
                     if(p.X != -1) //right exists
                     {
-                        if(board[p.X, p.Y].horWord.Count == 0) //hor and right no hor
-                            board[ct.X, ct.Y].horWord.AddLast(p);
-                        //else //hor and right hor
+                        if(board[p.X, p.Y].horWord.Count == 0){Console.WriteLine("right no hor: " + board[p.X, p.Y].GetLetter()); //hor and right no hor
+                            board[ct.X, ct.Y].horWord.AddLast(p);}
+                        else Console.WriteLine("right hor: " + board[p.X, p.Y].phorWord()); //hor and right hor
                     }
-                    //now that our tile's word is accurate, update left and right words if they exist
-                    for(int j = 0; j < 2; j++)
+                    //now that our tile's word is accurate, update horWord for all letters in it
+                    Console.WriteLine("---update horWord---: " + board[ct.X, ct.Y].phorWord());
+                    foreach(Point j in board[ct.X, ct.Y].horWord)
                     {
-                        p = adjTiles[j];
-                        if(p.X != -1)
+                        if(j != ct)
                         {
-                            board[p.X, p.Y].horWord.Clear();
-                            board[p.X, p.Y].horWord = new LinkedList<Point>(board[ct.X, ct.Y].horWord);
+                            board[j.X, j.Y].horWord.Clear();
+                            board[j.X, j.Y].horWord = new LinkedList<Point>(board[ct.X, ct.Y].horWord);
                         }
                     }
                 }
             }
             if(board[ct.X, ct.Y].vertWord.Count == 0) //no vert
-            {
+            {Console.WriteLine("***no vert***: " + board[ct.X, ct.Y].GetLetter());
                 if(adjTiles[2].X != -1 || adjTiles[3].X != -1) //if this tile is connected vertically, start building vertWord
                 {
                     board[ct.X, ct.Y].vertWord.AddFirst(ct);
@@ -339,10 +339,10 @@ public class ScrabbleGame
                     Point p = adjTiles[2];
                     if(p.X != -1) //up exists
                     {
-                        if(board[p.X, p.Y].vertWord.Count == 0) //no vert and up no vert
-                            board[ct.X, ct.Y].vertWord.AddFirst(p);
+                        if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("up no vert: " + board[p.X, p.Y].GetLetter()); //no vert and up no vert
+                            board[ct.X, ct.Y].vertWord.AddFirst(p);}
                         else //no vert and up vert
-                        {
+                        {Console.WriteLine("up vert: " + board[p.X, p.Y].pvertWord());
                             for(LinkedListNode<Point> node = board[p.X, p.Y].vertWord.Last; node != null; node = node.Previous)
                             {
                                 board[ct.X, ct.Y].vertWord.AddFirst(node.Value);
@@ -352,54 +352,54 @@ public class ScrabbleGame
                     p = adjTiles[3];
                     if(p.X != -1) //down exists
                     {
-                        if(board[p.X, p.Y].vertWord.Count == 0) //no vert and down no vert
-                            board[ct.X, ct.Y].vertWord.AddLast(p);
+                        if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("down no vert: " + board[p.X, p.Y].GetLetter()); //no vert and down no vert
+                            board[ct.X, ct.Y].vertWord.AddLast(p);}
                         else //no vert and down vert
-                        {
+                        {Console.WriteLine("down vert: " + board[p.X, p.Y].pvertWord());
                             for(LinkedListNode<Point> node = board[p.X, p.Y].vertWord.First; node != null; node = node.Next)
                             {
                                 board[ct.X, ct.Y].vertWord.AddLast(node.Value);
                             }
                         }
                     }
-                    //now that our tile's word is accurate, update up and down words if they exist
-                    for(int j = 2; j < 4; j++)
+                    //now that our tile's word is accurate, update vertWord for all letters in it
+                    Console.WriteLine("---update vertWord---: " + board[ct.X, ct.Y].pvertWord());
+                    foreach(Point j in board[ct.X, ct.Y].vertWord)
                     {
-                        p = adjTiles[j];
-                        if(p.X != -1)
+                        if(j != ct)
                         {
-                            board[p.X, p.Y].vertWord.Clear();
-                            board[p.X, p.Y].vertWord = new LinkedList<Point>(board[ct.X, ct.Y].vertWord);
+                            board[j.X, j.Y].vertWord.Clear();
+                            board[j.X, j.Y].vertWord = new LinkedList<Point>(board[ct.X, ct.Y].vertWord);
                         }
                     }
                 }
             }
             else //vert
-            {
+            {Console.WriteLine("***vert***: " + board[ct.X, ct.Y].GetLetter());
                 if(adjTiles[2].X != -1 || adjTiles[3].X != -1) //if this tile is connected vertically, update vertWord
                 {
                     Point p = adjTiles[2];
                     if(p.X != -1) //up exists
                     {
-                        if(board[p.X, p.Y].vertWord.Count == 0) //vert and up no vert
-                            board[ct.X, ct.Y].vertWord.AddFirst(p);
-                        //else //vert and up vert
+                        if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("up no vert: " + board[p.X, p.Y].GetLetter()); //vert and up no vert
+                            board[ct.X, ct.Y].vertWord.AddFirst(p);}
+                        else Console.WriteLine("up vert: " + board[p.X, p.Y].pvertWord());//vert and up vert
                     }
                     p = adjTiles[3];
                     if(p.X != -1) //down exists
                     {
-                        if(board[p.X, p.Y].vertWord.Count == 0) //vert and down no vert
-                            board[ct.X, ct.Y].vertWord.AddLast(p);
-                        //else //vert and down vert
+                        if(board[p.X, p.Y].vertWord.Count == 0){Console.WriteLine("down no vert: " + board[p.X, p.Y].GetLetter()); //vert and down no vert
+                            board[ct.X, ct.Y].vertWord.AddLast(p);}
+                        else Console.WriteLine("down vert: " + board[p.X, p.Y].pvertWord());//vert and down vert
                     }
-                    //now that our tile's word is accurate, update up and down words if they exist
-                    for(int j = 2; j < 4; j++)
+                    //now that our tile's word is accurate, update vertWord for all letters in it
+                    Console.WriteLine("---update vertWord---: " + board[ct.X, ct.Y].pvertWord());
+                    foreach(Point j in board[ct.X, ct.Y].vertWord)
                     {
-                        p = adjTiles[j];
-                        if(p.X != -1)
+                        if(j != ct)
                         {
-                            board[p.X, p.Y].vertWord.Clear();
-                            board[p.X, p.Y].vertWord = new LinkedList<Point>(board[ct.X, ct.Y].vertWord);
+                            board[j.X, j.Y].vertWord.Clear();
+                            board[j.X, j.Y].vertWord = new LinkedList<Point>(board[ct.X, ct.Y].vertWord);
                         }
                     }
                 }
@@ -408,9 +408,9 @@ public class ScrabbleGame
 
         //get list of unique words modified
         List<LinkedList<Point>> wordsBuilt = new List<LinkedList<Point>>();
-        for(int i = 0; i < modifiedTiles.Count; i++)
+        for(int i = 0; i < consideredTiles.Count; i++)
         {
-            Tile tile = board[modifiedTiles[i].X, modifiedTiles[i].Y];
+            Tile tile = board[consideredTiles[i].X, consideredTiles[i].Y];
             for(int j = 0; j < 2; j++)
             {
                 LinkedList<Point> word;
@@ -424,6 +424,8 @@ public class ScrabbleGame
                     bool found = false;
                     for(int k = 0; k < wordsBuilt.Count && !found; k++)
                     {
+                        if(word.Count != wordsBuilt[k].Count)
+                            continue;
                         found = true;
                         LinkedListNode<Point> wordNode = word.First;
                         LinkedListNode<Point> listNode = wordsBuilt[k].First;
@@ -454,7 +456,7 @@ public class ScrabbleGame
             }
             stringsBuilt.Add(forwards);
             stringsBuilt.Add(backwards);
-            Console.WriteLine(forwards);
+            Console.WriteLine("\"" + forwards + "\" or \"" + backwards + "\"");
         }    
         
         //compare list of forwards and backwards strings against all possible words, if any unique string isn't found then return false
