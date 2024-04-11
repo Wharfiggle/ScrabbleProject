@@ -9,10 +9,19 @@ public class RackTile : Tile
     public bool pickedUp = false;
     private int player = -1;
     private Vector2 putbackPos;
+    private bool onBoard = false;
     
     public RackTile(char letter, int player) : base(letter)
     {
         this.player = player;
+    }
+
+    public void PutBack()
+    {
+        pickedUp = false;
+        onBoard = false;
+        SetPos(putbackPos);
+        boardSpot = new Point(-1, -1);
     }
 
     public override void Update(GameTime gameTime)
@@ -45,26 +54,25 @@ public class RackTile : Tile
                 if(IsClicked()) //if clicked while snapping to a board spot, place tile there
                 {
                     pickedUp = false;
+                    onBoard = true;
                     boardSpot = bSpot; //assign board spot coordinate to this rack tile
                     game.scrabble.AddToIncomingWord(this); //pass rack tile to ScrabbleGame to determine if the word is valid
                 }
             }
             else if(IsClicked()) //if clicked while not snapping to a board spot, return tile to rack
-            {
-                pickedUp = false;
-                SetPos(putbackPos);
-            }
+                PutBack();
         }
         else if(IsClicked() && game.scrabble.playerTurn == player) //clicked while not picked up
         {
-            pickedUp = true;
-            if(boardSpot == new Point(-1, -1)) //if in rack when picked up
-                putbackPos = GetPos();
-            else //if on board when picked up
+            if(onBoard)
             {
                 game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
                 boardSpot = new Point(-1, -1);
             }
+            else
+                putbackPos = GetPos();
+            pickedUp = true;
+            onBoard = false;
         }
     }
 
@@ -84,7 +92,7 @@ public class RackTile : Tile
             contourColor.A = 255;
         }
 
-        if(boardSpot == new Point(-1, -1))
+        if(!onBoard)
             base.Draw(gameTime, _spriteBatch);
     }
 }
