@@ -53,7 +53,7 @@ public class RackTile : Tile
             if(minDistance < GetSize().X) //if there is a valid board spot to snap to
             {
                 SetPos(game.scrabble.board[bSpot.X, bSpot.Y].GetPos()); //snap to board spot
-                if(IsClicked()) //if clicked while snapping to a board spot, place tile there
+                if(game.GetMousePressed()) //if clicked while snapping to a board spot, place tile there
                 {
                     pickedUp = false;
                     onBoard = true;
