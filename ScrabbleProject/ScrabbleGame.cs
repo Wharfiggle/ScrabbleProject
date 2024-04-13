@@ -244,6 +244,7 @@ public class ScrabbleGame
         {
             tileBag.Add(incomingSwap[i].GetLetter());
         }
+        RefillRack(playerTurn); //refill again if tile bag ran out of tiles while refilling so player isnt left with less than 7
         incomingWord.Clear();
         playerTurn = (playerTurn + 1) % playerRacks.Count();
         Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
@@ -262,8 +263,21 @@ public class ScrabbleGame
             incomingWord.Clear();
             RefillRack(playerTurn);
 
-            if(playerRacks[playerTurn].Count == 0)
+            if(playerRacks[playerTurn].Count == 0) //end of game
             {
+                int rackPointSum = 0;
+                for(int i = 0; i < playerPoints.Count(); i++)
+                {
+                    int rackPoints = 0;
+                    foreach(RackTile rt in playerRacks[i])
+                    {
+                        rackPoints += rt.GetPointValue();
+                    }
+                    playerPoints[i] -= rackPoints;
+                    rackPointSum += rackPoints;
+                }
+                playerPoints[playerTurn] += rackPointSum;
+
                 int highest = 0;
                 for(int i = 0; i < playerPoints.Count(); i++)
                 {
@@ -697,6 +711,8 @@ public class ScrabbleGame
             totalAddedPoints += wordPoints * wordMultiplier;
         }
 
+        if(addedTiles.Count >= 7) //bingo
+            totalAddedPoints += 50;
         playerPoints[playerTurn] += totalAddedPoints;
         Console.WriteLine("Scored " + totalAddedPoints + " points!");
     }
