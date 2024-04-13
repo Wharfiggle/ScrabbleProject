@@ -1,8 +1,5 @@
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using ScrabbleProject;
 
 public class RackTile : Tile
 {
@@ -53,7 +50,7 @@ public class RackTile : Tile
             if(minDistance < GetSize().X) //if there is a valid board spot to snap to
             {
                 SetPos(game.scrabble.board[bSpot.X, bSpot.Y].GetPos()); //snap to board spot
-                if(game.GetMousePressed()) //if clicked while snapping to a board spot, place tile there
+                if(game.GetMousePressed()[0]) //if clicked while snapping to a board spot, place tile there
                 {
                     pickedUp = false;
                     onBoard = true;
@@ -61,20 +58,37 @@ public class RackTile : Tile
                     game.scrabble.AddToIncomingWord(this); //pass rack tile to ScrabbleGame to determine if the word is valid
                 }
             }
-            else if(IsClicked()) //if clicked while not snapping to a board spot, return tile to rack
+            else if(IsClicked()[0]) //if clicked while not snapping to a board spot, return tile to rack
                 PutBack();
         }
-        else if(IsClicked() && game.scrabble.playerTurn == player) //clicked while not picked up
+        else if(game.scrabble.playerTurn == player) //clicked while not picked up
         {
-            if(onBoard)
+            if(IsClicked()[0]) //left clicked
             {
-                game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
-                boardSpot = new Point(-1, -1);
+                if(onBoard)
+                {
+                    game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
+                    boardSpot = new Point(-1, -1);
+                }
+                else
+                    putbackPos = GetPos();
+                pickedUp = true;
+                onBoard = false;
             }
-            else
-                putbackPos = GetPos();
-            pickedUp = true;
-            onBoard = false;
+            else if(IsClicked()[1]) //right clicked
+            {
+                if(!onBoard)
+                {
+                    onBoard = true;
+                    game.scrabble.AddToIncomingSwap(this);
+                    putbackPos = GetPos();
+                }
+                else
+                {
+                    game.scrabble.RemoveFromIncomingWord(this);
+                    PutBack();
+                }
+            }
         }
     }
 
@@ -94,7 +108,7 @@ public class RackTile : Tile
             contourColor.A = 255;
         }
 
-        if(!onBoard)
+        if(!onBoard) //dont draw while on board because board will draw that tile separately anyway
             base.Draw(gameTime, _spriteBatch);
     }
 }

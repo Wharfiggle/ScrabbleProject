@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ScrabbleProject;
@@ -16,11 +15,14 @@ public class ScrabbleGame
     public string[] allPossibleWords;
 
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
+    private LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[4];
+    private int[] playerPoints = new int[4];
     public int playerTurn = 0;
-    public LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[2];
-    public Vector2 rackSize = new Vector2(600, 80);
+    private int wonPlayer = -1;
+    public Vector2 rackSize = new Vector2(550, 73);
     public int rackTileSize = -1;
     private List<RackTile> incomingWord = new List<RackTile>();
+    private List<RackTile> incomingSwap = new List<RackTile>();
 
     //2d array of characters representing each letter that's been played
     //If nothing has been played at a spot then the element is null.
@@ -28,6 +30,11 @@ public class ScrabbleGame
     public int squareSize = 35;
     public Vector2 boardPos;
     private bool enterPressed = false;
+    private Texture2D confirm;
+    private Texture2D confirmHighlight;
+    private Point confirmSize = new Point(100, 100);
+    private Point[] confirmPos = new Point[2];
+    private bool[] confirmHover = {false, false};
 
     //Info for board spot bonuses
     public enum BonusType {Letter, Word, None}
@@ -87,6 +94,10 @@ public class ScrabbleGame
     public int[] pointsForEachLetter =     {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3,10, 1, 1, 1, 1, 4, 4, 8, 4,10, 0};
     public List<char> tileBag = new List<char>();
 
+    private bool cheat = false;
+    private int cheatProgress = 0;
+    private char[] cheatChars = {'C', 'H', 'E', 'A', 'T'};
+
     //constructor, information that needs to be accessed by other objects for the rest of the game should be set here
     public ScrabbleGame(Game1 game)
     {
@@ -131,6 +142,14 @@ public class ScrabbleGame
         {
             allPossibleWords[i - 2] = tempWords[i];
         }
+
+        for(int i = 0; i < playerPoints.Length; i++)
+        {
+            playerPoints[i] = 0;
+        }
+
+        confirmPos[0] = new Point((int)game.GetWindowSize().X / 2 + 330, (int)game.GetWindowSize().Y / 2);
+        confirmPos[1] = new Point((int)game.GetWindowSize().X / 2 - 330, (int)game.GetWindowSize().Y / 2);
     }
 
     //called during game's Initialize
@@ -148,7 +167,7 @@ public class ScrabbleGame
     {
         Random rand = new Random();
         int numNeeded = 7 - playerRacks[ind].Count;
-        for(int i = 0; i < numNeeded; i++)
+        for(int i = 0; i < numNeeded && tileBag.Count > 0; i++)
         {
             int rn = rand.Next(0, tileBag.Count);
 
@@ -168,11 +187,103 @@ public class ScrabbleGame
     {
         incomingWord.Add(rt);
         board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(rt.GetLetter());
+        if(incomingSwap.Count() > 0)
+            ResetIncomingSwap();
     }
     public void RemoveFromIncomingWord(RackTile rt)
     {
         incomingWord.Remove(rt);
         board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+    }
+    public void AddToIncomingSwap(RackTile rt)
+    {
+        incomingSwap.Add(rt);
+        if(incomingWord.Count() > 0)
+            ResetIncomingWord();
+    }
+    public void RemoveFromIncomingSwap(RackTile rt)
+    {
+        incomingWord.Remove(rt);
+    }
+
+    public void ResetIncomingSwap()
+    {
+        for(int i = 0; i < incomingSwap.Count(); i++)
+        {
+            incomingSwap[i].PutBack();
+        }
+        incomingSwap.Clear();
+    }
+    public void ResetIncomingWord()
+    {
+        for(int i = 0; i < incomingWord.Count(); i++)
+        {
+            Point bs = incomingWord[i].boardSpot;
+            board[bs.X, bs.Y].SetLetter(' ');
+            incomingWord[i].PutBack();
+        }
+        incomingWord.Clear();
+    }
+
+    private void Submit()
+    {
+        if(incomingWord.Count() > 0)
+            SubmitIncomingWord();
+        else if(incomingSwap.Count() > 0)
+            SubmitIncomingSwap();
+    }
+    private void SubmitIncomingSwap()
+    {
+        for(int i = 0; i < incomingSwap.Count(); i++)
+        {
+            game.RemoveGameObject(incomingSwap[i]);
+            playerRacks[playerTurn].Remove(incomingSwap[i]);
+        }
+        RefillRack(playerTurn);
+        for(int i = 0; i < incomingSwap.Count(); i++)
+        {
+            tileBag.Add(incomingSwap[i].GetLetter());
+        }
+        incomingWord.Clear();
+        playerTurn = (playerTurn + 1) % playerRacks.Count();
+        Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
+    }
+    private void SubmitIncomingWord()
+    {
+        if(IsIncomingWordValid())
+        {
+            for(int i = 0; i < incomingWord.Count(); i++)
+            {
+                Point bs = incomingWord[i].boardSpot;
+                board[bs.X, bs.Y].SetLetter(incomingWord[i].GetLetter());
+                game.RemoveGameObject(incomingWord[i]);
+                playerRacks[playerTurn].Remove(incomingWord[i]);
+            }
+            incomingWord.Clear();
+            RefillRack(playerTurn);
+
+            if(playerRacks[playerTurn].Count == 0)
+            {
+                int highest = 0;
+                for(int i = 0; i < playerPoints.Count(); i++)
+                {
+                    if(playerPoints[i] > highest)
+                    {
+                        highest = playerPoints[i];
+                        wonPlayer = i;
+                    }
+                }
+                playerTurn = -1;
+                Console.WriteLine("Game Over");
+            }
+            else
+            {
+                playerTurn = (playerTurn + 1) % playerRacks.Count();
+                Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
+            }
+        }
+        else
+            ResetIncomingWord();
     }
 
     private Point[] GetAdjacentTiles(Point boardSpot)
@@ -523,7 +634,7 @@ public class ScrabbleGame
             stringsBuilt.Add(forwards);
             stringsBuilt.Add(backwards);
             Console.WriteLine("\"" + forwards + "\" or \"" + backwards + "\"");
-        }    
+        }
         
         //compare list of forwards and backwards strings against all possible words, if any unique string isn't found then return false
         result = true;
@@ -547,7 +658,7 @@ public class ScrabbleGame
         if(result)
         {
             Console.WriteLine("All words valid!");
-            AddPointsFromWords(wordsBuilt);
+            AddPoints(wordsBuilt, consideredTiles);
         }
         else
         {
@@ -561,61 +672,90 @@ public class ScrabbleGame
     }
 
     //takes words built from IsIncomingWordValid, calculates points, and gives them to the current player
-    private void AddPointsFromWords(List<LinkedList<Point>> wordsBuilt)
+    private void AddPoints(List<LinkedList<Point>> wordsModified, List<Point> addedTiles)
     {
+        int totalAddedPoints = 0;
 
+        for(int i = 0; i < wordsModified.Count; i++)
+        {
+            int wordPoints = 0;
+            int wordMultiplier = 1;
+            foreach(Point p in wordsModified[i])
+            {
+                int points = board[p.X, p.Y].GetPointValue();
+                if(addedTiles.Contains(p))
+                {
+                    Bonus bonus = bonuses[p.X, p.Y];
+                    if(bonus.type == BonusType.Letter)
+                        points *= bonus.multiplier;
+                    else if(bonus.type == BonusType.Word)
+                        wordMultiplier *= bonus.multiplier;
+                }
+                wordPoints += points;
+            }
+
+            totalAddedPoints += wordPoints * wordMultiplier;
+        }
+
+        playerPoints[playerTurn] += totalAddedPoints;
+        Console.WriteLine("Scored " + totalAddedPoints + " points!");
+    }
+
+    //called during game's LoadContent
+    public void LoadContent(ContentManager Content)
+    {
+        confirm = Content.Load<Texture2D>("Sprites/Confirm");
+        confirmHighlight = Content.Load<Texture2D>("Sprites/ConfirmHighlight");
     }
 
     //called during game's Update
     public void Update(GameTime gameTime)
     {
-        for(int i = 0; i < 26; i++)
+        //cheat to change tiles on current player's rack to whatever key you press, type all characters in cheatChars to enable
+        if(Keyboard.GetState().IsKeyDown((Keys)cheatChars[cheatProgress]))
         {
-            if(Keyboard.GetState().IsKeyDown((Keys)(65 + i)))
+            cheatProgress = (cheatProgress + 1) % cheatChars.Length;
+            if(cheatProgress == 0)
+                cheat = !cheat;
+        }
+        if(cheat)
+        {
+            for(int i = 0; i < 26; i++)
             {
-                foreach(Tile t in playerRacks[playerTurn])
+                if(Keyboard.GetState().IsKeyDown((Keys)('A' + i)))
                 {
-                    if(t.boardSpot == new Point(-1, -1))
+                    foreach(Tile t in playerRacks[playerTurn])
                     {
-                        t.SetLetter((char)('A' + i));
-                        break;
+                        if(t.boardSpot == new Point(-1, -1))
+                        {
+                            t.SetLetter((char)('A' + i));
+                            break;
+                        }
                     }
                 }
             }
         }
-        if(Keyboard.GetState().IsKeyDown(Keys.Enter)) //when enter is pressed, apply placed tiles and move to next turn
+
+        //when enter is pressed or one of the confirm buttons is pressed, apply placed tiles and move to next turn
+        if(Keyboard.GetState().IsKeyDown(Keys.Enter))
         {
             if(!enterPressed)
-            {
-                if(IsIncomingWordValid())
-                {
-                    for(int i = 0; i < incomingWord.Count(); i++)
-                    {
-                        Point bs = incomingWord[i].boardSpot;
-                        board[bs.X, bs.Y].SetLetter(incomingWord[i].GetLetter());
-                        game.RemoveGameObject(incomingWord[i]);
-                        playerRacks[playerTurn].Remove(incomingWord[i]);
-                    }
-                    incomingWord.Clear();
-                    RefillRack(playerTurn);
-                    playerTurn = (playerTurn + 1) % playerRacks.Count();
-                    Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
-                }
-                else
-                {
-                    for(int i = 0; i < incomingWord.Count(); i++)
-                    {
-                        Point bs = incomingWord[i].boardSpot;
-                        board[bs.X, bs.Y].SetLetter(' ');
-                        incomingWord[i].PutBack();
-                    }
-                    incomingWord.Clear();
-                }
-            }
+                Submit();
             enterPressed = true;
         }
         else
             enterPressed = false;
+
+        for(int i = 0; i < 2; i++)
+        {
+            Vector2 cp = new Vector2(confirmPos[i].X, confirmPos[i].Y);
+            if((game.GetMousePos() - cp).Length() < confirmSize.X / 2)
+                confirmHover[i] = true;
+            else
+                confirmHover[i] = false;
+        }
+        if(game.GetMousePressed()[0] && (confirmHover[0] || confirmHover[1]))
+            Submit();
     }
 
     //called during game's Draw
@@ -654,15 +794,110 @@ public class ScrabbleGame
             }
         }
 
-        //draw racks
-        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, rackSize.Y / 2), 
-            size: rackSize, centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, game.GetWindowSize().Y - rackSize.Y / 2), 
-            size: rackSize, centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(rackSize.Y / 2, game.GetWindowSize().Y / 2), 
-            size: new Vector2(rackSize.Y, rackSize.X), centered: true, color: Color.Brown);
-        game.DrawRect(pos: new Vector2(game.GetWindowSize().X - rackSize.Y / 2, game.GetWindowSize().Y / 2), 
-            size: new Vector2(rackSize.Y, rackSize.X), centered: true, color: Color.Brown);
+        int uiThickness = 10;
+        Vector2 pointSize = new Vector2(170, 48);
+        int pointMargin = 20;
+        Vector2[] pointPos = new Vector2[4];
+        Color outlineColor = Color.DarkRed;
+
+        //draw confirm buttons
+        Texture2D confirmTex;
+        if(confirmHover[0])
+            confirmTex = confirmHighlight;
+        else
+            confirmTex = confirm;
+        _spriteBatch.Draw(confirmTex, new Rectangle(confirmPos[0] - new Point(confirmSize.X / 2, confirmSize.Y / 2), confirmSize), Color.White);
+        if(confirmHover[1])
+            confirmTex = confirmHighlight;
+        else
+            confirmTex = confirm;
+        _spriteBatch.Draw(confirmTex, new Rectangle(confirmPos[1] - new Point(confirmSize.X / 2, confirmSize.Y / 2), confirmSize), Color.White);
+
+        //draw racks and point scores
+
+        //player 1
+        if(playerRacks.Count() < 1)
+            return;
+
+        if(playerTurn == 0)
+            outlineColor = Color.Black;
+        else
+            outlineColor = Color.Maroon;
+        if(wonPlayer == 0)
+            outlineColor = Color.Green;
+
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, game.GetWindowSize().Y - rackSize.Y / 2 - uiThickness / 2), 
+            size: rackSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, game.GetWindowSize().Y - rackSize.Y / 2 - uiThickness / 2), 
+            size: rackSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+
+        pointPos[0] = new Vector2(game.GetWindowSize().X - (pointSize.X / 2 + uiThickness + pointMargin), game.GetWindowSize().Y - (pointSize.Y / 2 + uiThickness / 2));
+        game.DrawRect(pos: pointPos[0], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: pointPos[0], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+        game.DrawStringCentered(font: game.fonts[0], str: playerPoints[0].ToString(), pointPos[0], color: Color.White);
+
+        //player 2
+        if(playerRacks.Count() < 2)
+            return;
+
+        if(playerTurn == 1)
+            outlineColor = Color.Black;
+        else
+            outlineColor = Color.Maroon;
+        if(wonPlayer == 1)
+            outlineColor = Color.Green;
+
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, rackSize.Y / 2 + uiThickness / 2), 
+            size: rackSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X / 2, rackSize.Y / 2 + uiThickness / 2), 
+            size: rackSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+
+        pointPos[1] = new Vector2(pointSize.X / 2 + uiThickness + pointMargin, pointSize.Y / 2 + uiThickness / 2);
+        game.DrawRect(pos: pointPos[1], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: pointPos[1], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+        game.DrawStringCentered(font: game.fonts[0], str: playerPoints[1].ToString(), pointPos[1], color: Color.White);
+
+        //player 3
+        if(playerRacks.Count() < 3)
+            return;
+
+        if(playerTurn == 2)
+            outlineColor = Color.Black;
+        else
+            outlineColor = Color.Maroon;
+        if(wonPlayer == 2)
+            outlineColor = Color.Green;
+        
+        game.DrawRect(pos: new Vector2(rackSize.Y / 2 + uiThickness / 2, game.GetWindowSize().Y / 2), 
+            size: new Vector2(rackSize.Y, rackSize.X), centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: new Vector2(rackSize.Y / 2 + uiThickness / 2, game.GetWindowSize().Y / 2), 
+            size: new Vector2(rackSize.Y, rackSize.X), centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+        
+        pointPos[2] = new Vector2(pointSize.X / 2 + uiThickness / 2, game.GetWindowSize().Y - (pointSize.Y / 2 + uiThickness + pointMargin));
+        game.DrawRect(pos: pointPos[2], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: pointPos[2], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+        game.DrawStringCentered(font: game.fonts[0], str: playerPoints[2].ToString(), pointPos[2], color: Color.White);
+        
+        //player 4
+        if(playerRacks.Count() < 4)
+            return;
+
+        if(playerTurn == 3)
+            outlineColor = Color.Black;
+        else
+            outlineColor = Color.Maroon;
+        if(wonPlayer == 3)
+            outlineColor = Color.Green;
+
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X - rackSize.Y / 2 - uiThickness / 2, game.GetWindowSize().Y / 2), 
+            size: new Vector2(rackSize.Y, rackSize.X), centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: new Vector2(game.GetWindowSize().X - rackSize.Y / 2 - uiThickness / 2, game.GetWindowSize().Y / 2), 
+            size: new Vector2(rackSize.Y, rackSize.X), centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+
+        pointPos[3] = new Vector2(game.GetWindowSize().X - (pointSize.X / 2 + uiThickness / 2), pointSize.Y / 2 + uiThickness + pointMargin);
+        game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
+        game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
+        game.DrawStringCentered(font: game.fonts[0], str: playerPoints[3].ToString(), pointPos[3], color: Color.White);
     }
 
     private void UpdateRackTilePositions(int ind)
@@ -674,17 +909,17 @@ public class ScrabbleGame
         {
             tilePos.X = game.GetWindowSize().X / 2 - rackSize.X / 2;
             if(ind == 0) //bottom
-                tilePos.Y = game.GetWindowSize().Y - rackSize.Y / 2.5f;
+                tilePos.Y = game.GetWindowSize().Y - rackSize.Y / 2;
             else //top
-                tilePos.Y = rackSize.Y / 2.5f;
+                tilePos.Y = rackSize.Y / 2;
         }
         else //left and right
         {
             tilePos.Y = game.GetWindowSize().Y / 2 - rackSize.X / 2;
             if(ind == 2) //left
-                tilePos.X = rackSize.Y / 2.5f;
+                tilePos.X = rackSize.Y / 2;
             else //right
-                tilePos.X = game.GetWindowSize().X - rackSize.Y / 2.5f;
+                tilePos.X = game.GetWindowSize().X - rackSize.Y / 2;
         }
 
         LinkedListNode<RackTile> node = playerRacks[ind].First;

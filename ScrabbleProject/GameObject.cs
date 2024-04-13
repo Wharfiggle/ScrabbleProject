@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using ScrabbleProject;
 
 public class GameObject
@@ -16,8 +15,8 @@ public class GameObject
     public bool loaded = false;
     public Color color;
     private bool hovered = false;
-    private bool clicked = false;
-    private bool held = false;
+    private bool[] clicked = {false, false};
+    private bool[] held = {false, false};
 
     //constructor
     public GameObject(string spritePath = "", Vector2 pos = default, bool centerOrigin = false, Vector2 size = default, Color color = default)
@@ -90,16 +89,19 @@ public class GameObject
         Vector2 mp = game.GetMousePos();
         hovered = mp.X >= drawPos.X && mp.Y >= drawPos.Y && mp.X < drawPos.X + size.X && mp.Y < drawPos.Y + size.Y;
 
-        //sets clicked to true if hovered is true and the left mouse button was just clicked, false otherwise.
-        clicked = hovered && game.GetMousePressed();
+        for(int i = 0; i < 2; i++)
+        {
+            //sets clicked to true if hovered is true and the left mouse button was just clicked, false otherwise.
+            clicked[i] = hovered && game.GetMousePressed()[i];
 
-        //sets held to true if hovered is true and the left mouse button is being held, false otherwise.
-        held = hovered && game.GetMouseHeld();
+            //sets held to true if hovered is true and the left mouse button is being held, false otherwise.
+            held[i] = hovered && game.GetMouseHeld()[i];
+        }
     }
 
     public bool IsHovered() { return hovered; }
-    public bool IsClicked() { return clicked; }
-    public bool IsHeld() { return held; }
+    public bool[] IsClicked() { return clicked; }
+    public bool[] IsHeld() { return held; }
 
     //called during game's Draw
     public virtual void Draw(GameTime gameTime, SpriteBatch _spriteBatch)
