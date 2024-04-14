@@ -1,18 +1,19 @@
 public class Trie {
     private readonly TrieNode root = new TrieNode();
 
-    public void addWord(string word) {
+    public void AddWord(string word) {
         TrieNode curNode = root;
 
         foreach (char c in word) {
             if(!curNode.children.ContainsKey(c)) {
                 curNode.children.Add(c, new TrieNode());
             }
+            curNode = curNode.children[c];
         }
         curNode.isSuccessState = true;
     }
 
-    public bool search(string word) {
+    public bool Search(string word) {
         var curNode = root;
         foreach (char c in word) {
             if(!curNode.children.ContainsKey(c)){
