@@ -919,7 +919,7 @@ public class ScrabbleGame
     private void UpdateRackTilePositions(int ind)
     {
         //update each RackTile based on which rack they're in and their position in that rack
-        int bufferWidth = (int)((rackSize.X - playerRacks[0].Count() * rackTileSize) / (playerRacks[0].Count() + 1));
+        int bufferWidth = (int)((rackSize.X - playerRacks[ind].Count() * rackTileSize) / (playerRacks[ind].Count() + 1));
         Vector2 tilePos = new Vector2(0, 0);
         if(ind < 2) //bottom and top
         {
