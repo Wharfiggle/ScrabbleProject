@@ -1,5 +1,6 @@
+[Serializable]
 public class Trie {
-    private readonly TrieNode root = new TrieNode();
+    public  TrieNode root {get; set;} = new TrieNode();
 
     public void AddWord(string word) {
         TrieNode curNode = root;
