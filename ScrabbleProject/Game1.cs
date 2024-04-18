@@ -41,6 +41,7 @@ public class Game1 : Game
     private bool[] mousePressed = {false, false};
     private bool[] mouseHeld = {false, false};
     private bool[] mouseReleased = {false, false};
+    public List<string> players = new List<string>();
     
 
     public Game1()
@@ -75,6 +76,17 @@ public class Game1 : Game
         _graphics.PreferredBackBufferWidth = (int)windowSize.X;
         _graphics.PreferredBackBufferHeight = (int)windowSize.Y;
         _graphics.ApplyChanges();
+
+        //read PlayerConfig file and assign players to be either cpu, player, or none
+        StreamReader sr = new StreamReader("../../../Content/PlayerConfig.txt");
+        for(string line = sr.ReadLine(); line != null && players.Count() < 4; line = sr.ReadLine())
+        {
+            Console.WriteLine(line);
+            string fl = line.ToLower();
+            if(fl == "player" || fl == "cpu")
+                players.Add(fl);
+        }
+        sr.Close();
 
         //create our scrabble game
         scrabble = new ScrabbleGame(this);

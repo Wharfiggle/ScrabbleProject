@@ -15,8 +15,8 @@ public class ScrabbleGame
     public string[] allPossibleWords;
 
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
-    private LinkedList<RackTile>[] playerRacks = new LinkedList<RackTile>[4];
-    private int[] playerPoints = new int[4];
+    private LinkedList<RackTile>[] playerRacks;
+    private int[] playerPoints;
     public int playerTurn = 0;
     private int wonPlayer = -1;
     public Vector2 rackSize = new Vector2(550, 73);
@@ -103,6 +103,10 @@ public class ScrabbleGame
     {
         this.game = game;
         
+        //set up player information based on players from game which has information read from PlayerConfig.txt
+        playerRacks = new LinkedList<RackTile>[game.players.Count()];
+        playerPoints = new int[game.players.Count()];
+
         //get total number of tiles to go in tileBag
         int numTiles = 0;
         for(int i = 0; i < numTilesForEachLetter.Length; i++)
@@ -163,6 +167,29 @@ public class ScrabbleGame
         }
     }
 
+    public void GoToNextTurn()
+    {
+        playerTurn = (playerTurn + 1) % playerRacks.Count();
+        Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
+        
+        if(game.players[playerTurn] == "cpu")
+        {
+            //cpu behavior
+            List<char> letters = new List<char>(); //placeholder for incoming letters to place
+            List<Point> boardSpots = new List<Point>(); //placeholder for the spots on the board to place them at
+
+            foreach(RackTile rt in playerRacks[playerTurn])
+            {
+                for(int i = 0; i < letters.Count(); i++)
+                {
+                    if(rt.GetLetter() == letters[i])
+                        rt.AddToIncomingWord(boardSpots[i]);
+                }
+            }
+            Submit();
+        }
+    }
+
     public void RefillRack(int ind)
     {
         Random rand = new Random();
@@ -171,7 +198,10 @@ public class ScrabbleGame
         {
             int rn = rand.Next(0, tileBag.Count);
 
-            RackTile tile = new RackTile(tileBag[rn], ind);
+            int tilePlayer = ind;
+            if(game.players[ind] == "cpu")
+                tilePlayer = -1;
+            RackTile tile = new RackTile(tileBag[rn], tilePlayer);
             game.AddGameObject(tile);
             playerRacks[ind].AddLast(tile);
             tileBag.RemoveAt(rn);
@@ -227,10 +257,13 @@ public class ScrabbleGame
 
     private void Submit()
     {
-        if(incomingWord.Count() > 0)
-            SubmitIncomingWord();
-        else if(incomingSwap.Count() > 0)
-            SubmitIncomingSwap();
+        if(game.players[playerTurn] != "cpu")
+        {
+            if(incomingWord.Count() > 0)
+                SubmitIncomingWord();
+            else if(incomingSwap.Count() > 0)
+                SubmitIncomingSwap();
+        }
     }
     private void SubmitIncomingSwap()
     {
@@ -246,8 +279,7 @@ public class ScrabbleGame
         }
         RefillRack(playerTurn); //refill again if tile bag ran out of tiles while refilling so player isnt left with less than 7
         incomingWord.Clear();
-        playerTurn = (playerTurn + 1) % playerRacks.Count();
-        Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
+        GoToNextTurn();
     }
     private void SubmitIncomingWord()
     {
@@ -291,10 +323,7 @@ public class ScrabbleGame
                 Console.WriteLine("Game Over");
             }
             else
-            {
-                playerTurn = (playerTurn + 1) % playerRacks.Count();
-                Console.WriteLine("Player " + (playerTurn + 1) + "'s turn");
-            }
+                GoToNextTurn();
         }
         else
             ResetIncomingWord();

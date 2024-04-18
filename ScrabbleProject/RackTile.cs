@@ -21,6 +21,19 @@ public class RackTile : Tile
         boardSpot = new Point(-1, -1);
     }
 
+    public void AddToIncomingWord(Point boardSpot)
+    {
+        pickedUp = false;
+        onBoard = true;
+        this.boardSpot = boardSpot; //assign board spot coordinate to this rack tile
+        game.scrabble.AddToIncomingWord(this); //pass rack tile to ScrabbleGame to determine if the word is valid
+    }
+    public void RemoveFromIncomingWord()
+    {
+        game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
+        boardSpot = new Point(-1, -1);
+    }
+
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
@@ -51,12 +64,7 @@ public class RackTile : Tile
             {
                 SetPos(game.scrabble.board[bSpot.X, bSpot.Y].GetPos()); //snap to board spot
                 if(game.GetMousePressed()[0]) //if clicked while snapping to a board spot, place tile there
-                {
-                    pickedUp = false;
-                    onBoard = true;
-                    boardSpot = bSpot; //assign board spot coordinate to this rack tile
-                    game.scrabble.AddToIncomingWord(this); //pass rack tile to ScrabbleGame to determine if the word is valid
-                }
+                    AddToIncomingWord(bSpot);
             }
             else if(IsClicked()[0]) //if clicked while not snapping to a board spot, return tile to rack
                 PutBack();
@@ -66,10 +74,7 @@ public class RackTile : Tile
             if(IsClicked()[0]) //left clicked
             {
                 if(onBoard)
-                {
-                    game.scrabble.RemoveFromIncomingWord(this); //remove this tile from word consideration
-                    boardSpot = new Point(-1, -1);
-                }
+                    RemoveFromIncomingWord();
                 else
                     putbackPos = GetPos();
                 pickedUp = true;
@@ -85,7 +90,7 @@ public class RackTile : Tile
                 }
                 else
                 {
-                    game.scrabble.RemoveFromIncomingWord(this);
+                    RemoveFromIncomingWord();
                     PutBack();
                 }
             }
