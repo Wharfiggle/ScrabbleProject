@@ -1,13 +1,13 @@
 [Serializable]
 public class Trie {
-    public  TrieNode root {get; set;} = new TrieNode();
+    public  Node root {get; set;} = new TrieNode();
 
     public void AddWord(string word) {
-        TrieNode curNode = root;
+        Node curNode = root;
 
         foreach (char c in word) {
             if(!curNode.children.ContainsKey(c)) {
-                curNode.children.Add(c, new TrieNode());
+                curNode.children.Add(c, new Node());
             }
             curNode = curNode.children[c];
         }

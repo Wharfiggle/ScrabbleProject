@@ -31,7 +31,7 @@ try {
     StreamReader sr2 = new StreamReader("TrieSer.json");
     string line = sr2.ReadLine();
     Trie? tree = JsonSerializer.Deserialize<Trie>(line);
-
+    hopcroftsAlg(tree);
     line = sr.ReadLine();
     while (line != null)
     {
@@ -49,4 +49,8 @@ static void SerializeObj(Trie t) {
     string jsonString = JsonSerializer.Serialize(t);
     Console.WriteLine(jsonString);
     File.WriteAllText("TrieSer.json", jsonString);
+}
+
+static void hopcroftsAlg(Trie tree) {
+
 }
