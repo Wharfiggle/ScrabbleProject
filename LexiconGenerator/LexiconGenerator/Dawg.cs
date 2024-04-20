@@ -19,7 +19,7 @@ public class Dawg
         Console.WriteLine("Filling dead transitions");
         fillDeadTransitions(ref deadNode, ref Root);
         Console.WriteLine("Finding Unreachable States");
-        findUnreachableStates(Root);
+        //findUnreachableStates(Root);
     }
 
     private void fillDeadTransitions(ref Node deadNode, ref Node curNode)
@@ -38,10 +38,25 @@ public class Dawg
         }
     }
 
-    public void findUnreachableStates(Node start)
+    public HopcroftsAlg()
     {
 
     }
+    /* 
+    public void findUnreachableStates(Node start)
+    {
+        Node[] reachableStates = [Root];
+        Node[] newStates = [Root];
+        do{
+            Node[] temp = [];
+            foreach (Node q in newStates) {
+                foreach (char c in charSet) {
+
+                }
+            }
+        }while(newStates.Length != 0);
+    }
+    */
 }
 
 // https://stackoverflow.com/questions/14025709/how-to-create-a-dawg

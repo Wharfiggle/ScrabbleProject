@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.VisualBasic;
 
+/*
 // Fill the trie with words
 try
 {
@@ -23,6 +24,7 @@ catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
 }
+*/
 // Test if it correctly identifies those words later
 
 // Deserialize the Trie from a file 
