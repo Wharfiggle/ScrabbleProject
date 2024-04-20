@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,6 +14,7 @@ public class ScrabbleGame
     Game1 game;
     //list of valid english words recognized by scrabble
     public string[] allPossibleWords;
+    Trie allPossibleWordsTrie;
 
     //player information. For now player 0 is assumed to be the player and player 1 is assumed to be the AI
     private LinkedList<RackTile>[] playerRacks;
@@ -90,7 +92,7 @@ public class ScrabbleGame
 
     //Info for tiles
                                           //A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z  ?
-    public int[] numTilesForEachLetter =   {9, 2, 2, 4,12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
+    public int[] numTilesForEachLetter =   {9, 2, 2, 4,12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 0/*2*/}; //dk evan change this when ready
     public int[] pointsForEachLetter =     {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3,10, 1, 1, 1, 1, 4, 4, 8, 4,10, 0};
     public List<char> tileBag = new List<char>();
 
@@ -146,6 +148,14 @@ public class ScrabbleGame
         {
             allPossibleWords[i - 2] = tempWords[i];
         }
+        //dk build tree
+        //evan is planning on implimenting a way to save and load or tree/dawg will be placed here when ready
+        allPossibleWordsTrie = new Trie();
+        Console.WriteLine("Starting tree build");
+        for (int i=0; i < allPossibleWords.Length; i++){
+            allPossibleWordsTrie.AddWord(allPossibleWords[i]);
+        }
+        Console.WriteLine("Finish tree building");
 
         for(int i = 0; i < playerPoints.Length; i++)
         {
@@ -678,25 +688,13 @@ public class ScrabbleGame
             stringsBuilt.Add(backwards);
             Console.WriteLine("\"" + forwards + "\" or \"" + backwards + "\"");
         }
-        
-        //compare list of forwards and backwards strings against all possible words, if any unique string isn't found then return false
-        result = true;
-        for(int i = 0; i < stringsBuilt.Count && result == true; i += 2)
-        {
-            bool found = false;
-            for(int j = 0; j < allPossibleWords.Length && found == false && result == true; j++)
-            {
-                string possibleWord = allPossibleWords[j];
-                if(possibleWord == stringsBuilt[i] || possibleWord == stringsBuilt[i + 1])
-                    found = true;
 
-                if(j == allPossibleWords.Length - 1 && found == false) //one of the spelled words was not found in the list of all possible words
-                {
-                    Console.WriteLine("\"" + stringsBuilt[i] + "\" or \"" + stringsBuilt[i + 1] + "\" is not a word.");
-                    result = false;
-                }
-            }
-        }
+        result = CheckStringsBuiltValidArr(stringsBuilt);
+        Console.WriteLine("result for arr : " + result);
+
+        result = CheckStringsBuiltValidTrie(stringsBuilt);
+        Console.WriteLine("result for tree : " + result);
+
 
         if(result)
         {
@@ -712,6 +710,50 @@ public class ScrabbleGame
         }
 
         return result;
+    }
+
+
+    // takes list of built words and comapres them against the list of legal words
+    private bool CheckStringsBuiltValidArr(List<string> stringsBuiltInp)
+    {
+
+        for (int i = 0; i < stringsBuiltInp.Count; i += 2)
+        {
+            bool found = false;
+            for (int j = 0; j < allPossibleWords.Length && found == false; j++)
+            {
+                string possibleWord = allPossibleWords[j];
+                if (possibleWord == stringsBuiltInp[i] || possibleWord == stringsBuiltInp[i + 1])
+                    found = true;
+
+                if (j == allPossibleWords.Length - 1 && found == false) //one of the spelled words was not found in the list of all possible words
+                {
+                    Console.WriteLine("\"" + stringsBuiltInp[i] + "\" or \"" + stringsBuiltInp[i + 1] + "\" is not a word.");
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // takes list of built words and comapres them against the tree of legal words
+    //the dawg implimentation should be identical assuming evan impliments same function
+        private bool CheckStringsBuiltValidTrie(List<string> stringsBuiltInp)
+    {
+
+        for (int i = 0; i < stringsBuiltInp.Count; i += 2)
+        {
+            if (allPossibleWordsTrie.Search(stringsBuiltInp[i]) || allPossibleWordsTrie.Search(stringsBuiltInp[i + 1]))
+            {
+                continue;
+            }
+            else {
+                return false;
+             }
+        }
+
+        return true;
     }
 
     //takes words built from IsIncomingWordValid, calculates points, and gives them to the current player
