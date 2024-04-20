@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class TrieNode {
+public class Node {
     public bool isSuccessState {get; set;} = false;
 
-    public Dictionary<char, TrieNode> children {get; set;} = new Dictionary<char, TrieNode>();
+    public Dictionary<char, Node> children {get; set;} = new Dictionary<char, Node>();
 
 
-    public void AddChild(TrieNode newChild, char letter) {
+    public void AddChild(Node newChild, char letter) {
         try
         {
         children.Add(letter, newChild);

@@ -1,6 +1,6 @@
 [Serializable]
 public class Trie {
-    public  Node root {get; set;} = new TrieNode();
+    public  Node root {get; set;} = new Node();
 
     public void AddWord(string word) {
         Node curNode = root;
