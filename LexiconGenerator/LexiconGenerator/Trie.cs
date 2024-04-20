@@ -1,27 +1,34 @@
 [Serializable]
-public class Trie {
-    public  Node root {get; set;} = new Node();
+public class Trie
+{
+    public Node root { get; set; } = new Node();
 
-    public void AddWord(string word) {
+    public void AddWord(string word)
+    {
         Node curNode = root;
 
-        foreach (char c in word) {
-            if(!curNode.children.ContainsKey(c)) {
-                curNode.children.Add(c, new Node());
+        foreach (char c in word)
+        {
+            if (!curNode.Children.ContainsKey(c))
+            {
+                curNode.Children.Add(c, new Node());
             }
-            curNode = curNode.children[c];
+            curNode = curNode.Children[c];
         }
-        curNode.isSuccessState = true;
+        curNode.IsSuccessState = true;
     }
 
-    public bool Search(string word) {
+    public bool Search(string word)
+    {
         var curNode = root;
-        foreach (char c in word) {
-            if(!curNode.children.ContainsKey(c)){
+        foreach (char c in word)
+        {
+            if (!curNode.Children.ContainsKey(c))
+            {
                 return false;
             }
-            curNode = curNode.children[c];
+            curNode = curNode.Children[c];
         }
-        return true;
+        return curNode.IsSuccessState;
     }
 }

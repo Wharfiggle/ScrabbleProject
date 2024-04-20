@@ -1,27 +1,46 @@
 [Serializable]
 
-public class Dawg {
-    public Node root {get; set} = new Node();
-    private char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+public class Dawg
+{
+    public Node Root = new Node();
+    private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Constructor creates the DAWG from a tree
-    public Dawg(Trie tree) {
-        root = tree.root;
-        Node deadNode = new Node();
-        foreach (char c in charSet) {
-            deadNode.children.Add(c, deadNode);
+    public Dawg(Trie tree)
+    {
+        Root = tree.root;
+
+        // Create a dead node that we can link all missing transitions to
+        // Turn the Trie into a DFA, then go through and fill those missing transitions
+        Node deadNode = new();
+        foreach (char c in charSet)
+        {
+            deadNode.AddChild(deadNode, c);
         }
-        fillDeadTransitions(deadNode);
+        Console.WriteLine("Filling dead transitions");
+        fillDeadTransitions(ref deadNode, ref Root);
+        Console.WriteLine("Finding Unreachable States");
+        findUnreachableStates(Root);
     }
 
-    private void fillDeadTransitions(Node deadNode) {
-
-    }
-    private void getNoTransitions(Node deadNode, Node currNode) {
-        foreach (char c in charSet) {
-            if (!currNode.children.ContainsKey(c)){
-                currNode.children.Add(c, deadNode);
+    private void fillDeadTransitions(ref Node deadNode, ref Node curNode)
+    {
+        foreach (char c in charSet)
+        {
+            if (curNode.Children.ContainsKey(c))
+            {
+                Node childNode = curNode.Children[c];
+                fillDeadTransitions(ref deadNode, ref childNode);
+            }
+            else
+            {
+                curNode.AddChild(deadNode, c);
             }
         }
+    }
+
+    public void findUnreachableStates(Node start)
+    {
+
     }
 }
 

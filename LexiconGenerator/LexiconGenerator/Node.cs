@@ -2,18 +2,22 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class Node {
-    public bool isSuccessState {get; set;} = false;
+public class Node
+{
+    public bool IsSuccessState { get; set; } = false;
 
-    public Dictionary<char, Node> children {get; set;} = new Dictionary<char, Node>();
+    public Dictionary<char, Node> Children { get; set; } = [];
 
 
-    public void AddChild(Node newChild, char letter) {
+    public void AddChild(Node newChild, char letter)
+    {
         try
         {
-        children.Add(letter, newChild);
-        } catch (ArgumentException) {
-            Console.WriteLine("An element is alerady mapped to letter: " + letter);
+            Children.Add(letter, newChild);
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine("An element is already mapped to letter: " + letter);
         }
     }
 
