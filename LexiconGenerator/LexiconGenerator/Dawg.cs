@@ -17,19 +17,19 @@ public class Dawg
             deadNode.AddChild(deadNode, c);
         }
         Console.WriteLine("Filling dead transitions");
-        fillDeadTransitions(ref deadNode, ref Root);
+        FillDeadTransitions(ref deadNode, ref Root);
         Console.WriteLine("Finding Unreachable States");
         //findUnreachableStates(Root);
     }
 
-    private void fillDeadTransitions(ref Node deadNode, ref Node curNode)
+    private void FillDeadTransitions(ref Node deadNode, ref Node curNode)
     {
         foreach (char c in charSet)
         {
             if (curNode.Children.ContainsKey(c))
             {
                 Node childNode = curNode.Children[c];
-                fillDeadTransitions(ref deadNode, ref childNode);
+                FillDeadTransitions(ref deadNode, ref childNode);
             }
             else
             {
@@ -38,9 +38,10 @@ public class Dawg
         }
     }
 
-    public HopcroftsAlg()
+    // / in the pseudocode means elements in A but not B
+    public void HopcroftsAlg()
     {
-
+        //HashSet<Node> P = HashSet<>
     }
     /* 
     public void findUnreachableStates(Node start)
