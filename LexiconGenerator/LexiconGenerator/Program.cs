@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.VisualBasic;
 
-/*
 // Fill the trie with words
 try
 {
@@ -19,16 +18,22 @@ try
     }
     sr.Close();
     SerializeObj(tree);
+    //Test if tree correctly identifies the words
+    
+    StreamReader sr2 = new StreamReader("sampleWords.txt");
+    line = sr2.ReadLine();
+    while (line != null) {
+        Console.WriteLine("Trie recognizes word: " + line + "? " + tree.Search(line));
+        line = sr2.ReadLine(); 
+    }
+    Dawg newDawg = new(tree);
 }
 catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
 }
-*/
-// Test if it correctly identifies those words later
-
 // Deserialize the Trie from a file 
-
+/*
 try
 {
 
@@ -51,12 +56,12 @@ catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
 }
-
+*/
 //SerializeObj(tree);
 
 static void SerializeObj(Trie t)
 {
     string jsonString = JsonSerializer.Serialize(t);
-    Console.WriteLine(jsonString);
+    //Console.WriteLine(jsonString);
     File.WriteAllText("TrieSer.json", jsonString);
 }

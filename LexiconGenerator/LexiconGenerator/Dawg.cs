@@ -3,11 +3,16 @@
 public class Dawg
 {
     public Node Root = new Node();
+    public HashSet<Node> FinalStates{get; set;} = [];
+    public HashSet<Node> NonFinalStates {get; set;}  = []; 
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Constructor creates the DAWG from a tree
     public Dawg(Trie tree)
     {
-        Root = tree.root;
+        Root = tree.Root;
+        FinalStates = tree.FinalStates;
+        NonFinalStates = tree.AllStates;
+        NonFinalStates.RemoveWhere(FilterAllStates);
 
         // Create a dead node that we can link all missing transitions to
         // Turn the Trie into a DFA, then go through and fill those missing transitions
@@ -18,10 +23,13 @@ public class Dawg
         }
         Console.WriteLine("Filling dead transitions");
         FillDeadTransitions(ref deadNode, ref Root);
-        Console.WriteLine("Finding Unreachable States");
-        //findUnreachableStates(Root);
+        Console.WriteLine("Running Hopcrofts");
+    //    HopcroftsAlg(Root);
     }
 
+    private bool FilterAllStates(Node n){
+        return FinalStates.Contains(n);
+    }
     private void FillDeadTransitions(ref Node deadNode, ref Node curNode)
     {
         foreach (char c in charSet)
@@ -38,11 +46,13 @@ public class Dawg
         }
     }
 
-    // / in the pseudocode means elements in A but not B
-    public void HopcroftsAlg()
+    // / in the pseudocode / means elements in A but not B
+    public void HopcroftsAlg(Node root)
     {
-        //HashSet<Node> P = HashSet<>
+        HashSet<Node>[] P = [FinalStates,NonFinalStates ];
+        HashSet<Node>[] W = [FinalStates,NonFinalStates];
     }
+
     /* 
     public void findUnreachableStates(Node start)
     {
