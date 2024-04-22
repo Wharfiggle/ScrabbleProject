@@ -2,8 +2,8 @@
 public class Trie
 {
     public Node Root { get; set; } = new Node();
-    public HashSet<Node> FinalStates {get; set;} = [];
-    public HashSet<Node> AllStates {get; set;} = [];
+    public HashSet<Node> FinalStates { get; set; } = [];
+    public HashSet<Node> AllStates { get; set; } = [];
     public void AddWord(string word)
     {
         Node curNode = Root;
@@ -21,17 +21,27 @@ public class Trie
         FinalStates.Add(curNode);
     }
 
-    public bool Search(string word)
+    // 0 = false,
+    // 1 = true,
+    // -1 = search "Fell Off" Trie
+    public int Search(string word)
     {
         var curNode = Root;
         foreach (char c in word.Trim())
         {
             if (!curNode.Children.TryGetValue(c, out Node? value))
             {
-                return false;
+                return -1;
             }
             curNode = value;
         }
-        return curNode.IsSuccessState;
+        if (curNode.IsSuccessState)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
