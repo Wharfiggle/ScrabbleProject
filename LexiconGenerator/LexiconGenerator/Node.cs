@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Node
 {
     public bool IsSuccessState { get; set; } = false;
-
+    public Node? Parent {get; set;}
     public Dictionary<char, Node> Children { get; set; } = new Dictionary<char, Node>();
 
 
