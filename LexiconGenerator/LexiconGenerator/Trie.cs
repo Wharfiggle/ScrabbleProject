@@ -12,7 +12,8 @@ public class Trie
         {
             curNode.Children[c] = new Node
             {
-                Parent = curNode
+                Parent = curNode,
+                ParentChar = c
             };
             curNode = curNode.Children[c];
             AllStates.Add(curNode);

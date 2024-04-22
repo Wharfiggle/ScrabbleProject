@@ -5,7 +5,10 @@ using System.Collections.Generic;
 public class Node
 {
     public bool IsSuccessState { get; set; } = false;
-    public Node? Parent {get; set;}
+    public Node? Parent { get; set; }
+
+    // Denotes the char that the transition from the parent is on.
+    public char ParentChar { get; set; }
     public Dictionary<char, Node> Children { get; set; } = new Dictionary<char, Node>();
 
 

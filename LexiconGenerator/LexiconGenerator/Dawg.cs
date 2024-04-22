@@ -3,9 +3,10 @@
 public class Dawg
 {
     public Node Root = new Node();
-    public HashSet<Node> FinalStates{get; set;} = [];
-    public HashSet<Node> NonFinalStates {get; set;}  = []; 
-    private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    public HashSet<Node> FinalStates { get; set; } = [];
+    public HashSet<Node> NonFinalStates { get; set; } = [];
+    private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Constructor creates the DAWG from a tree
     public Dawg(Trie tree)
     {
@@ -24,19 +25,20 @@ public class Dawg
         Console.WriteLine("Filling dead transitions");
         FillDeadTransitions(ref deadNode, ref Root);
         Console.WriteLine("Running Hopcrofts");
-    //    HopcroftsAlg(Root);
+        //    HopcroftsAlg(Root);
     }
 
-    private bool FilterAllStates(Node n){
+    private bool FilterAllStates(Node n)
+    {
         return FinalStates.Contains(n);
     }
     private void FillDeadTransitions(ref Node deadNode, ref Node curNode)
     {
         foreach (char c in charSet)
         {
-            if (curNode.Children.ContainsKey(c))
+            if (curNode.Children.TryGetValue(c, out Node? value))
             {
-                Node childNode = curNode.Children[c];
+                Node childNode = value;
                 FillDeadTransitions(ref deadNode, ref childNode);
             }
             else
@@ -49,8 +51,22 @@ public class Dawg
     // / in the pseudocode / means elements in A but not B
     public void HopcroftsAlg(Node root)
     {
-        HashSet<Node>[] P = [FinalStates,NonFinalStates ];
-        HashSet<Node>[] W = [FinalStates,NonFinalStates];
+        HashSet<Node>[] P = [FinalStates, NonFinalStates];
+        HashSet<Node> W = FinalStates;
+        while (W.Count != 0)
+        {
+            // chose a set A from W
+            Node A = W.ElementAt(0);
+            W.Remove(A);
+            foreach (char c in charSet)
+            {
+                HashSet<Node> X = [];
+                if (A.ParentChar == c)
+                {
+                    X.Add(A.Parent);
+                }
+            }
+        }
     }
 
     /* 
