@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 [Serializable]
 
 public class Dawg
@@ -25,7 +27,7 @@ public class Dawg
         Console.WriteLine("Filling dead transitions");
         FillDeadTransitions(ref deadNode, ref Root);
         Console.WriteLine("Running Hopcrofts");
-        //    HopcroftsAlg(Root);
+        HopcroftsAlg(Root);
     }
 
     private bool FilterAllStates(Node n)
@@ -51,8 +53,11 @@ public class Dawg
     // / in the pseudocode / means elements in A but not B
     public void HopcroftsAlg(Node root)
     {
-        HashSet<Node>[] P = [FinalStates, NonFinalStates];
+        HashSet<Node> P = [];
+        P.Concat(FinalStates);
+        P.Concat(NonFinalStates);
         HashSet<Node> W = FinalStates;
+        HashSet<Node> X = [];
         while (W.Count != 0)
         {
             // chose a set A from W
@@ -60,12 +65,39 @@ public class Dawg
             W.Remove(A);
             foreach (char c in charSet)
             {
-                HashSet<Node> X = [];
                 if (A.ParentChar == c)
                 {
                     X.Add(A.Parent);
                 }
+                for(int i = 0; i < P.Count(); i++) {
+                    // Potential Issue. What about multi element sets?
+                    HashSet<Node> Y = [P.ElementAt(i)];
+                    HashSet<Node> intersection = new HashSet<Node>(X.Intersect(Y));
+                    HashSet<Node> complement = new HashSet<Node>(Y.Except(X));
+                    if (intersection.Count != 0 && complement.Count != 0) {
+                        // Replace Y in P by the two sets X n Y and Y \ X
+                        P.RemoveWhere(Y.Contains);
+                        P.Concat(intersection);
+                        P.Concat(complement);
+
+                        if(W.IsSubsetOf(Y)) {
+                            W.RemoveWhere(Y.Contains);
+                            W.Concat(intersection) ;
+                            W.Concat(complement);
+                        } else if (intersection.Count <= complement.Count) {
+                            W.Concat(intersection);
+                        } else {
+                            W.Concat(complement);
+                        } 
+                    } else {
+                        W.RemoveWhere(Y.Contains);
+                    }
+                }
             }
+        }
+
+        foreach (Node n in P) {
+            
         }
     }
 

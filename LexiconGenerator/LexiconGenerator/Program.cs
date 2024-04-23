@@ -17,7 +17,7 @@ try
         line = sr.ReadLine();
     }
     sr.Close();
-    SerializeObj(tree);
+ //   SerializeObj(tree);
     //Test if tree correctly identifies the words
     
     StreamReader sr2 = new StreamReader("sampleWords.txt");
