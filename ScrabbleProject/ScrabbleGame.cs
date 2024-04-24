@@ -233,7 +233,10 @@ public class ScrabbleGame
     public void RemoveFromIncomingWord(RackTile rt)
     {
         incomingWord.Remove(rt);
-        board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+        if(rt.boardSpot != new Point(-1, -1))
+            board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+        else
+            Console.WriteLine("RackTile being removed from IncomingWord had a boardSpot of (-1, -1). This shouldn't happen");
     }
     public void AddToIncomingSwap(RackTile rt)
     {
