@@ -10,22 +10,25 @@ public class Trie
 
         foreach (char c in word)
         {
-            if (curNode.Children.TryGetValue(c, out Node? value))  {
+            if (curNode.Children.TryGetValue(c, out Node? value))
+            {
                 curNode = value;
-            } else {
+            }
+            else
+            {
                 Node newNode = new()
                 {
-                    Parent = curNode,
-                    ParentChar = c
-                }; 
+                    Parents.Add(c, List<Node>().Add(Node)),
+                };
                 curNode.Children.Add(c, newNode);
                 curNode = curNode.Children[c];
                 AllStates.Add(curNode);
             }
-            
+
         }
         curNode.IsSuccessState = true;
-        if (!FinalStates.Add(curNode)) {
+        if (!FinalStates.Add(curNode))
+        {
             Console.WriteLine("Failed");
         }
     }

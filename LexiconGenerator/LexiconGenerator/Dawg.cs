@@ -9,7 +9,16 @@ public class Dawg
     public HashSet<Node> NonFinalStates { get; set; } = [];
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    // Constructor creates the DAWG from a tree
+    
+    public Dawg() {
+
+    }
+
+    // Trie Traversal must be done in a post-order manner
+    public void Minimize(){
+
+    }
+    /*
     public Dawg(Trie tree)
     {
         Root = tree.Root;
@@ -66,7 +75,6 @@ while (W is not empty) do
                     add X ∩ Y to W
                 else
                     add Y \ X to W
-    */
     public void HopcroftsAlg(Node root)
     {
         HashSet<Node> P = [];
