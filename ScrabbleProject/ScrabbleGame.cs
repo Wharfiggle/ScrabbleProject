@@ -104,6 +104,8 @@ public class ScrabbleGame
     private double bingoTimer = 0;
     private double bingoFlashTime = 0.2;
 
+    private bool waitingForCPU = false;
+
     //constructor, information that needs to be accessed by other objects for the rest of the game should be set here
     public ScrabbleGame(Game1 game)
     {
@@ -189,6 +191,7 @@ public class ScrabbleGame
         if(game.players[playerTurn] == "cpu")
         {
             //cpu behavior
+            waitingForCPU = true;
             List<char> letters = new List<char>(); //placeholder for incoming letters to place
             List<Point> boardSpots = new List<Point>(); //placeholder for the spots on the board to place them at
 
@@ -201,6 +204,7 @@ public class ScrabbleGame
                 }
             }
             Submit();
+            waitingForCPU = false;
         }
     }
 
@@ -1014,6 +1018,10 @@ public class ScrabbleGame
             game.DrawStringCentered(font: game.fonts[7], str: "BINGO!", color: Color.Black);
             game.DrawStringCentered(font: game.fonts[3], str: "BINGO!", color: flashColor);
         }
+
+        //show message showing player that the cpu is still thinking
+        if(waitingForCPU)
+            game.DrawStringCentered(font: game.fonts[5], str: "Waiting for CPU...", color: new Color(0, 50, 0));
     }
 
     private void UpdateRackTilePositions(int ind)
