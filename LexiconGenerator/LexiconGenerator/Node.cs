@@ -58,5 +58,5 @@ public class Node : IEquatable<Node>
         return result;
     }
     public override bool Equals(object? obj) => Equals(obj as Node);
-    public override int GetHashCode() => (IsSuccessState, ParentChar).GetHashCode();
+    public override int GetHashCode() => (IsSuccessState, ParentChar, Parent).GetHashCode();
 }

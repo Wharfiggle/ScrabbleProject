@@ -25,7 +25,9 @@ public class Trie
             
         }
         curNode.IsSuccessState = true;
-        FinalStates.Add(curNode);
+        if (!FinalStates.Add(curNode)) {
+            Console.WriteLine("Failed");
+        }
     }
 
     // 0 = false,

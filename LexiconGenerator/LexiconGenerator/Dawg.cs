@@ -44,7 +44,6 @@ public class Dawg
             }
             else
             {
-                //curNode.AddChild(deadNode, c);
                 curNode.Children.Add(c, deadNode);
             }
         }
@@ -73,7 +72,9 @@ while (W is not empty) do
         HashSet<Node> P = [];
         P.UnionWith(NonFinalStates);
         P.UnionWith(FinalStates);
-        HashSet<Node> W = FinalStates;
+        //HashSet<Node> W = FinalStates;
+        HashSet<Node> W = [];
+        W.UnionWith(FinalStates);
         HashSet<Node> X = [];
         while (W.Count != 0)
         {
