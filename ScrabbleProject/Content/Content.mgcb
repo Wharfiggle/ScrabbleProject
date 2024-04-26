@@ -34,6 +34,13 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/CourierNew24.spritefont
 
+#begin Fonts/Impact64.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Impact64.spritefont
+
 #begin Fonts/LucidaSansTypewriter18.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -54,6 +61,13 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:Fonts/LucidaSansTypewriter8.spritefont
+
+#begin Fonts/OutlineImpact.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/OutlineImpact.spritefont
 
 #begin Sprites/Confirm.png
 /importer:TextureImporter

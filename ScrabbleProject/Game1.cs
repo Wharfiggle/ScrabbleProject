@@ -176,6 +176,8 @@ public class Game1 : Game
             gameObjects[i].Draw(gameTime, _spriteBatch);
         }
 
+        scrabble.DrawOnTop(gameTime, _spriteBatch);
+
 
         _spriteBatch.End();
 
@@ -264,7 +266,7 @@ public class Game1 : Game
     public void DrawStringCentered(SpriteFont font, string str, Vector2 pos = default, Color color = default)
     {
         if(pos == default)
-            pos = new Vector2(windowSize.Y, windowSize.Y);
+            pos = new Vector2(windowSize.X / 2, windowSize.Y / 2);
         if(color == default)
             color = Color.Black;
 

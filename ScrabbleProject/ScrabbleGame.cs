@@ -100,6 +100,10 @@ public class ScrabbleGame
     private int cheatProgress = 0;
     private char[] cheatChars = {'C', 'H', 'E', 'A', 'T'};
 
+    private double bingoTime = 1.5;
+    private double bingoTimer = 0;
+    private double bingoFlashTime = 0.2;
+
     //constructor, information that needs to be accessed by other objects for the rest of the game should be set here
     public ScrabbleGame(Game1 game)
     {
@@ -786,7 +790,11 @@ public class ScrabbleGame
         }
 
         if(addedTiles.Count >= 7) //bingo
+        {
             totalAddedPoints += 50;
+            bingoTimer = bingoTime;
+        }
+
         playerPoints[playerTurn] += totalAddedPoints;
         Console.WriteLine("Scored " + totalAddedPoints + " points!");
     }
@@ -872,7 +880,7 @@ public class ScrabbleGame
                 game.DrawRect(tilePos, new Vector2(squareSize, squareSize), false, -lineThickness, true, squareColor);
                 
                 //draw bonus text label
-                game.DrawStringCentered(game.fonts[3], bonus, tilePos + new Vector2(squareSize / 2, squareSize / 2), Color.White);
+                game.DrawStringCentered(game.fonts[4], bonus, tilePos + new Vector2(squareSize / 2, squareSize / 2), Color.White);
                 
                 //draw square border lines
                 game.DrawLine(tilePos, tilePos + new Vector2(squareSize, 0), lineThickness, new Color(115, 76, 35));
@@ -988,6 +996,24 @@ public class ScrabbleGame
         game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
         game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
         game.DrawStringCentered(font: game.fonts[0], str: playerPoints[3].ToString(), pointPos[3], color: Color.White);
+    }
+    //for drawing things on top of all objects instead of under them
+    public void DrawOnTop(GameTime gameTime, SpriteBatch _spriteBatch)
+    {
+        //flash bingo on the screen when a bingo is achieved
+        if(bingoTimer > 0)
+        {
+            bingoTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+            
+            Color flashColor;
+            if(bingoTimer % bingoFlashTime < bingoFlashTime / 2)
+                flashColor = Color.White;
+            else
+                flashColor = Color.Red;
+
+            game.DrawStringCentered(font: game.fonts[7], str: "BINGO!", color: Color.Black);
+            game.DrawStringCentered(font: game.fonts[3], str: "BINGO!", color: flashColor);
+        }
     }
 
     private void UpdateRackTilePositions(int ind)
