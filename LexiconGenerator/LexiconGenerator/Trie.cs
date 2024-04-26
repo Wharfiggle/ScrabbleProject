@@ -8,15 +8,21 @@ public class Trie
     {
         Node curNode = Root;
 
-        foreach (char c in word.Trim())
+        foreach (char c in word)
         {
-            curNode.Children[c] = new Node
-            {
-                Parent = curNode,
-                ParentChar = c
-            };
-            curNode = curNode.Children[c];
-            AllStates.Add(curNode);
+            if (curNode.Children.TryGetValue(c, out Node? value))  {
+                curNode = value;
+            } else {
+                Node newNode = new()
+                {
+                    Parent = curNode,
+                    ParentChar = c
+                }; 
+                curNode.Children.Add(c, newNode);
+                curNode = curNode.Children[c];
+                AllStates.Add(curNode);
+            }
+            
         }
         curNode.IsSuccessState = true;
         FinalStates.Add(curNode);
@@ -27,7 +33,7 @@ public class Trie
     // -1 = search "Fell Off" Trie
     public int Search(string word)
     {
-        var curNode = Root;
+        Node curNode = Root;
         foreach (char c in word.Trim())
         {
             if (!curNode.Children.TryGetValue(c, out Node? value))

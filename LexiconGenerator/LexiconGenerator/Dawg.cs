@@ -40,22 +40,39 @@ public class Dawg
         {
             if (curNode.Children.TryGetValue(c, out Node? value))
             {
-                Node childNode = value;
-                FillDeadTransitions(ref deadNode, ref childNode);
+                FillDeadTransitions(ref deadNode, ref value);
             }
             else
             {
-                curNode.AddChild(deadNode, c);
+                //curNode.AddChild(deadNode, c);
+                curNode.Children.Add(c, deadNode);
             }
         }
     }
 
-    // / in the pseudocode / means elements in A but not B
+    /* Hopcrofts Algorithm : https://en.wikipedia.org/wiki/DFA_minimization
+P := {F, Q \ F}
+W := {F, Q \ F}
+
+while (W is not empty) do
+    choose and remove a set A from W
+    for each c in Σ do
+        let X be the set of states for which a transition on c leads to a state in A
+        for each set Y in P for which X ∩ Y is nonempty and Y \ X is nonempty do
+            replace Y in P by the two sets X ∩ Y and Y \ X
+            if Y is in W
+                replace Y in W by the same two sets
+            else
+                if |X ∩ Y| <= |Y \ X|
+                    add X ∩ Y to W
+                else
+                    add Y \ X to W
+    */
     public void HopcroftsAlg(Node root)
     {
         HashSet<Node> P = [];
-        P.Concat(FinalStates);
-        P.Concat(NonFinalStates);
+        P.UnionWith(NonFinalStates);
+        P.UnionWith(FinalStates);
         HashSet<Node> W = FinalStates;
         HashSet<Node> X = [];
         while (W.Count != 0)
@@ -80,7 +97,7 @@ public class Dawg
                         P.Concat(intersection);
                         P.Concat(complement);
 
-                        if(W.IsSubsetOf(Y)) {
+                        if(Y.IsSubsetOf(W)) {
                             W.RemoveWhere(Y.Contains);
                             W.Concat(intersection) ;
                             W.Concat(complement);
@@ -95,12 +112,29 @@ public class Dawg
                 }
             }
         }
-
-        foreach (Node n in P) {
-            
-        }
     }
 
+    // Same search Method as Trie
+    public int Search(string word)
+    {
+        var curNode = Root;
+        foreach (char c in word.Trim())
+        {
+            if (!curNode.Children.TryGetValue(c, out Node? value))
+            {
+                return -1;
+            }
+            curNode = value;
+        }
+        if (curNode.IsSuccessState)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
     /* 
     public void findUnreachableStates(Node start)
     {
