@@ -5,20 +5,47 @@ using System.Runtime.CompilerServices;
 public class Dawg
 {
     public Node Root = new Node();
-    public HashSet<Node> FinalStates { get; set; } = [];
-    public HashSet<Node> NonFinalStates { get; set; } = [];
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    
+
+    private Stack<Node> uncheckedNodes = new Stack<Node>();
+    private string previousWord = "" ;
     public Dawg() {
-
+    
     }
 
-    // Trie Traversal must be done in a post-order manner
-    public void Minimize(){
+    public void Insert(string word){
+        int commonPrefix = findCommonPrefix(word);
+        // Minimize
+        Minimize()
+        Node curNode = uncheckedNodes.Count() == 0 ? Root : uncheckedNodes.Peek(); 
+        foreach (char c in word.Substring(commonPrefix, word.Length)){
+            if(curNode.Children.TryGetValue(c, out Node? value)){
+                curNode = value;
+            } else {
+                Node newNode = new Node();
+                curNode.Children.Add(c, newNode);
+                curNode = newNode;
+            }
+        }
+        curNode.IsSuccessState = true;
+        previousWord = word;
+    }
+    // Potentially return an int 
+    private int findCommonPrefix(string word) {
+        int searchLength = word.Length < previousWord.Length ? word.Length : previousWord.Length;
+        for (int i = 0; i < searchLength; i ++) {
+            if (word[i] != previousWord[i]) {
+               return i; 
+            }        
+        }
+        return 0;
+    }
+
+    private void Minimize(){
 
     }
-    /*
+    /* Commenting everything out because we are trying a different method
     public Dawg(Trie tree)
     {
         Root = tree.Root;
@@ -58,23 +85,6 @@ public class Dawg
         }
     }
 
-    /* Hopcrofts Algorithm : https://en.wikipedia.org/wiki/DFA_minimization
-P := {F, Q \ F}
-W := {F, Q \ F}
-
-while (W is not empty) do
-    choose and remove a set A from W
-    for each c in Σ do
-        let X be the set of states for which a transition on c leads to a state in A
-        for each set Y in P for which X ∩ Y is nonempty and Y \ X is nonempty do
-            replace Y in P by the two sets X ∩ Y and Y \ X
-            if Y is in W
-                replace Y in W by the same two sets
-            else
-                if |X ∩ Y| <= |Y \ X|
-                    add X ∩ Y to W
-                else
-                    add Y \ X to W
     public void HopcroftsAlg(Node root)
     {
         HashSet<Node> P = [];
