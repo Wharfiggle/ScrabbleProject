@@ -18,7 +18,8 @@ public class Trie
             {
                 Node newNode = new()
                 {
-                    Parents.Add(c, List<Node>().Add(Node)),
+                    Parent = curNode,
+                    ParentChar = c
                 };
                 curNode.Children.Add(c, newNode);
                 curNode = curNode.Children[c];

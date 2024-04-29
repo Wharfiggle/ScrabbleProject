@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class Node : IEquatable<Node>
 {
     public bool IsSuccessState { get; set; } = false;
-    //public Node? Parent { get; set; } Old Parent Code
-    public Dictionary<char, List<Node>> Parents {get; set;} = new Dictionary<char, List<Node>>();
+    public Node? Parent {get; set;} = null;
+ 
     // Denotes the Character on the edge leading into the node
- //   public char ParentChar { get; set; }
+    public char ParentChar {get; set;}
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Denotes the char that the transition from the parent is on.
@@ -20,16 +20,13 @@ public class Node : IEquatable<Node>
         {
             return false;
         }
-        if (other.ParentChar != ParentChar)
-        {
+        if (other.ParentChar != ParentChar){
             return false;
         }
         string mySubtree = findSubtreeString(this);
         string otherSubtree = findSubtreeString(other);
         bool comparison = mySubtree.Equals(otherSubtree);
         return comparison;
-
-        //return findSubtreeString(this).Equals(findSubtreeString(other));
     }
     private string findSubtreeString(Node root)
     {
