@@ -102,7 +102,7 @@ public class ScrabbleGame
 
     private double bingoTime = 1.5;
     private double bingoTimer = 0;
-    private double bingoFlashTime = 0.2;
+    private double bingoFlashSpeed = 50;
 
     private bool waitingForCPU = false;
 
@@ -1009,11 +1009,9 @@ public class ScrabbleGame
         {
             bingoTimer -= gameTime.ElapsedGameTime.TotalSeconds;
             
-            Color flashColor;
-            if(bingoTimer % bingoFlashTime < bingoFlashTime / 2)
-                flashColor = Color.White;
-            else
-                flashColor = Color.Red;
+            float t = (float)(Math.Sin(bingoTimer * bingoFlashSpeed) + 1) / 2.0f;
+            t *= 0.8f;
+            Color flashColor = new Color(1.0f, 1.0f - t, 1.0f - t);
 
             game.DrawStringCentered(font: game.fonts[7], str: "BINGO!", color: Color.Black);
             game.DrawStringCentered(font: game.fonts[3], str: "BINGO!", color: flashColor);
