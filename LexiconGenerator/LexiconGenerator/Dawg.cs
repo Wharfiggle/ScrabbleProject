@@ -1,124 +1,30 @@
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 [Serializable]
 
 public class Dawg
 {
-    public Node Root = new Node();
-    public HashSet<Node> FinalStates { get; set; } = [];
-    public HashSet<Node> NonFinalStates { get; set; } = [];
+    public Node Root{get; set;} = new Node();
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    // Constructor creates the DAWG from a tree
-    public Dawg(Trie tree)
-    {
-        Root = tree.Root;
-        FinalStates = tree.FinalStates;
-        NonFinalStates = tree.AllStates;
-        NonFinalStates.RemoveWhere(FilterAllStates);
 
-        // Create a dead node that we can link all missing transitions to
-        // Turn the Trie into a DFA, then go through and fill those missing transitions
-        Node deadNode = new();
-        foreach (char c in charSet)
-        {
-            deadNode.AddChild(deadNode, c);
-        }
-        Console.WriteLine("Filling dead transitions");
-        FillDeadTransitions(ref deadNode, ref Root);
-        Console.WriteLine("Running Hopcrofts");
-        HopcroftsAlg(Root);
+    // Stack keeps track of the transition into the unchecked node in the form of Parent, character, Child
+    private Stack<Tuple<Node, char, Node>> uncheckedNodes = new();
+
+    // List tracking nodes we have checked
+    private List<Node> minimizedNodes = new();
+    private string previousWord = "" ;
+    public Dawg() {
+    
+    }
+    public void CleanUp(){
+        uncheckedNodes.Clear();
+        minimizedNodes.Clear();
     }
 
-    private bool FilterAllStates(Node n)
-    {
-        return FinalStates.Contains(n);
-    }
-    private void FillDeadTransitions(ref Node deadNode, ref Node curNode)
-    {
-        foreach (char c in charSet)
-        {
-            if (curNode.Children.TryGetValue(c, out Node? value))
-            {
-                FillDeadTransitions(ref deadNode, ref value);
-            }
-            else
-            {
-                curNode.Children.Add(c, deadNode);
-            }
-        }
-    }
-
-    /* Hopcrofts Algorithm : https://en.wikipedia.org/wiki/DFA_minimization
-P := {F, Q \ F}
-W := {F, Q \ F}
-
-while (W is not empty) do
-    choose and remove a set A from W
-    for each c in Σ do
-        let X be the set of states for which a transition on c leads to a state in A
-        for each set Y in P for which X ∩ Y is nonempty and Y \ X is nonempty do
-            replace Y in P by the two sets X ∩ Y and Y \ X
-            if Y is in W
-                replace Y in W by the same two sets
-            else
-                if |X ∩ Y| <= |Y \ X|
-                    add X ∩ Y to W
-                else
-                    add Y \ X to W
-    */
-    public void HopcroftsAlg(Node root)
-    {
-        HashSet<Node> P = [];
-        P.UnionWith(NonFinalStates);
-        P.UnionWith(FinalStates);
-        //HashSet<Node> W = FinalStates;
-        HashSet<Node> W = [];
-        W.UnionWith(FinalStates);
-        HashSet<Node> X = [];
-        while (W.Count != 0)
-        {
-            // chose a set A from W
-            Node A = W.ElementAt(0);
-            W.Remove(A);
-            foreach (char c in charSet)
-            {
-                if (A.ParentChar == c)
-                {
-                    X.Add(A.Parent);
-                }
-                for(int i = 0; i < P.Count(); i++) {
-                    // Potential Issue. What about multi element sets?
-                    HashSet<Node> Y = [P.ElementAt(i)];
-                    HashSet<Node> intersection = new HashSet<Node>(X.Intersect(Y));
-                    HashSet<Node> complement = new HashSet<Node>(Y.Except(X));
-                    if (intersection.Count != 0 && complement.Count != 0) {
-                        // Replace Y in P by the two sets X n Y and Y \ X
-                        P.RemoveWhere(Y.Contains);
-                        P.Concat(intersection);
-                        P.Concat(complement);
-
-                        if(Y.IsSubsetOf(W)) {
-                            W.RemoveWhere(Y.Contains);
-                            W.Concat(intersection) ;
-                            W.Concat(complement);
-                        } else if (intersection.Count <= complement.Count) {
-                            W.Concat(intersection);
-                        } else {
-                            W.Concat(complement);
-                        } 
-                    } else {
-                        W.RemoveWhere(Y.Contains);
-                    }
-                }
-            }
-        }
-    }
-
-    // Same search Method as Trie
-    public int Search(string word)
-    {
-        var curNode = Root;
+    public int Search(string word)  {
+        Node curNode = Root;
         foreach (char c in word.Trim())
         {
             if (!curNode.Children.TryGetValue(c, out Node? value))
@@ -136,21 +42,52 @@ while (W is not empty) do
             return 0;
         }
     }
-    /* 
-    public void findUnreachableStates(Node start)
-    {
-        Node[] reachableStates = [Root];
-        Node[] newStates = [Root];
-        do{
-            Node[] temp = [];
-            foreach (Node q in newStates) {
-                foreach (char c in charSet) {
-
-                }
-            }
-        }while(newStates.Length != 0);
+    public void AddWord(string word){
+        int commonPrefix = FindCommonPrefix(word);
+        Minimize(commonPrefix);
+        Node curNode = uncheckedNodes.Count() == 0 ? Root : uncheckedNodes.Peek().Item3; 
+        string part = word.Substring(commonPrefix) ;
+        foreach (char c in word.Substring(commonPrefix)){
+                Node newNode = new(){
+                    Parent = curNode,
+                    ParentChar = c
+                };
+                curNode.Children.Add(c, newNode);
+                uncheckedNodes.Push(new Tuple<Node, char, Node>(curNode, c, newNode));
+                curNode = newNode;
+        }
+        curNode.IsSuccessState = true;
+        previousWord = word;
     }
-    */
-}
+    private int FindCommonPrefix(string word) {
+        int searchLength = word.Length < previousWord.Length ? word.Length : previousWord.Length;
+        int commonPrefix = 0; 
+        for (int i = 0; i < searchLength; i++) {
+            if (word[i] != previousWord[i]) {
+                break;
+            }       
+            commonPrefix++; 
+        }
+        return commonPrefix;
+    }
 
-// https://stackoverflow.com/questions/14025709/how-to-create-a-dawg
+    private void Minimize(int prefix){
+        for (int i = uncheckedNodes.Count - 1; i >= prefix; i--) {
+            Tuple<Node, char, Node> unNode = uncheckedNodes.Pop(); 
+            Node childNode = unNode.Item3;
+            Node parentNode = unNode.Item1;
+            char character = unNode.Item2;
+            
+            // If we have a minimized node that is equal to the current one then we will redirect the parent to the other node
+            if(minimizedNodes.Contains(childNode)){
+                if(parentNode.Children.ContainsKey(character)){
+                    parentNode.Children[character] = childNode;
+                } else{
+                    parentNode.Children.Add(character, childNode);
+                }
+            } else { // node is alerady minimized so we can continue
+                minimizedNodes.Add(childNode);
+            }
+        }
+    }
+}
