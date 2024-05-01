@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -100,6 +101,10 @@ public class ScrabbleGame
     private int cheatProgress = 0;
     private char[] cheatChars = {'C', 'H', 'E', 'A', 'T'};
 
+    private LinkedList<boardSeg> boardSegList  = new LinkedList<boardSeg>();
+    private LinkedList<string> aiStrings  = new LinkedList<string>();
+
+
     //constructor, information that needs to be accessed by other objects for the rest of the game should be set here
     public ScrabbleGame(Game1 game)
     {
@@ -148,14 +153,12 @@ public class ScrabbleGame
         {
             allPossibleWords[i - 2] = tempWords[i];
         }
-        //dk build tree
-        //evan is planning on implimenting a way to save and load or tree/dawg will be placed here when ready
+        //dk build trie
+        //evan is planning on implimenting a way to save and load or trie/dawg will be placed here when ready
         allPossibleWordsTrie = new Trie();
-        Console.WriteLine("Starting tree build");
         for (int i=0; i < allPossibleWords.Length; i++){
             allPossibleWordsTrie.AddWord(allPossibleWords[i]);
         }
-        Console.WriteLine("Finish tree building");
 
         for(int i = 0; i < playerPoints.Length; i++)
         {
@@ -184,10 +187,91 @@ public class ScrabbleGame
         
         if(game.players[playerTurn] == "cpu")
         {
+            //dk edit here
             //cpu behavior
+
+
+
+            /*
+            dk Logic
+            1: find all board words 
+            2: for each board word generate possible strings
+            
+            From here we have oprions depending on processing power/time:
+
+            1:  (dont care about actuall score)
+                Calculate score of only word, 
+                take top 10-50, and try to add them to board
+            2: (only care about actual score)
+                Insert each word into board/testboard
+                see which is best play
+                !Very intesive
+            3: (mix of 1 and 2)
+                Calculate score of only word, 
+                take top 10-50
+                then test these onto a testboard
+                see which is best
+            
+            */
+
+
+
+
+
+
+
+            Console.WriteLine("start genning board segs");
+            DereksMagicalFunctionFromHell();
+            Console.WriteLine("stop genning board segs");
+
+            string bsStr;
+            foreach (boardSeg bs in boardSegList)
+            {
+                aiStrings.Clear();
+                bsStr = "";
+                foreach (Tile tl in bs.tiles)
+                {
+                    bsStr += (tl.GetLetter());
+                }
+                Console.WriteLine("Board string for generating possible moves: " + bsStr);
+                generatePossibleWords2(playerRacks[playerTurn],bsStr);
+                string lastStr = "";
+                int points;
+                foreach(string gennedStr in aiStrings){
+                    if(gennedStr.Equals(lastStr)){
+                        continue;
+                    }
+                    points = getWordVal(gennedStr);
+                    if(points > 1){
+                        move thisMove = new move();
+                        //thisMove.moves = new LinkedList<move>();
+                        thisMove.word = gennedStr;
+                        thisMove.wordScore = points;
+                        Console.WriteLine("gennedStr: "+gennedStr+" points: " + points );
+                        bs.moves.AddFirst(thisMove); //huh
+                        lastStr = gennedStr;
+
+                    }
+
+                   
+                    
+
+                }
+
+            }
+
+            foreach (boardSeg bs in boardSegList){
+                foreach(move mv in bs.moves){
+                    SubmitAiGuess(bs.tiles,mv.word);
+                }
+
+            }
+            //generatePossibleWords2(playerRacks[playerTurn],"S");
+
             List<char> letters = new List<char>(); //placeholder for incoming letters to place
             List<Point> boardSpots = new List<Point>(); //placeholder for the spots on the board to place them at
 
+            /*
             foreach(RackTile rt in playerRacks[playerTurn])
             {
                 for(int i = 0; i < letters.Count(); i++)
@@ -197,8 +281,274 @@ public class ScrabbleGame
                 }
             }
             Submit();
+            */
         }
     }
+
+    public bool SubmitAiGuess(LinkedList<Tile> tilesIn, string inputStr){
+        
+        Console.WriteLine("AI guess for:");
+        foreach(Tile tl in tilesIn){
+            Console.WriteLine(tl.GetLetter() + " " + tl.boardSpot.ToString());
+        }
+        Console.WriteLine("leaving ai guess");
+        return false;//dk remove this
+
+        bool horSeg = true;
+        bool vertSeg = true;
+
+        int xVal, yVal;
+
+        string boardSeg = "";
+
+        xVal = tilesIn.First().boardSpot.X;
+        yVal = tilesIn.First().boardSpot.Y;
+
+        foreach(Tile tle in tilesIn){
+
+            boardSeg += tle.GetLetter();
+
+            if (tle.boardSpot.X != xVal){ horSeg = false;}
+            if (tle.boardSpot.Y != yVal){ vertSeg = false;}
+        }
+
+        int brdIndx = inputStr.IndexOf(boardSeg);
+        int brdEndIndex = (brdIndx +  tilesIn.Count() - 1);
+
+        if (brdIndx < 0){
+            Console.WriteLine("ln304 ERROR seg not found");
+            return false;
+        }
+
+        if(!horSeg && vertSeg){
+            //xVal should be constant
+            for (int iter = 0; iter < inputStr.Length && iter < 15 ; iter++){
+                if(iter >= brdIndx && iter <= brdEndIndex){
+                    ++iter;
+                }
+                if (iter >= 15){
+                    continue;
+                }
+                // check see if position open
+                yVal = tilesIn.First().boardSpot.Y - brdIndx;
+                if (board[xVal,yVal]!=null){
+                    Console.WriteLine("ocupied space found");
+                    return false;
+                }
+
+                foreach(RackTile rtle in playerRacks[playerTurn]){
+                    if (rtle.GetLetter() == inputStr[iter] && rtle.boardSpot.Y == -1){
+                        
+                    };
+                }
+
+            }
+
+        }
+        else if(!vertSeg && horSeg){
+
+        }
+        else if(vertSeg && horSeg){
+            Console.WriteLine("ln315 ERROR both seg");
+
+        }else{
+            Console.WriteLine("ln318 ERROR neither seg");
+        }
+
+
+
+        return false;
+    }
+
+    public int getWordVal(string strIn){
+        //pointsForEachLetter[]
+        int totalVal = 0;
+        foreach(char chari in strIn){
+            totalVal += (pointsForEachLetter[(chari-'A')]);
+        }
+        return totalVal;
+    }
+
+    
+    private void DereksMagicalFunctionFromHell(){
+        boardSegList.Clear();
+
+        for(int i = 0; i < board.GetLength(0); i++)
+        {
+            for(int j = 0; j < board.GetLength(1); j++)
+            {
+                //board[i, j] = new Tile(' ');
+
+                if (board[i, j].GetLetter() != ' ' ){
+                    Console.WriteLine("I: " + i + "J: " +j + " Letter: "+board[i, j].GetLetter());
+
+                    boardSeg addedSeg = new boardSeg();
+                    addedSeg.tiles = new LinkedList<Tile>();
+                    addedSeg.moves = new LinkedList<move>();
+
+
+                    //found a non blank letter
+                    while(board[i, j].GetLetter() != ' ' &&  j < board.GetLength(1)){
+                        addedSeg.tiles.AddLast(board[i,j]);
+                        Console.WriteLine("261 J: " +j +" letter: "+board[i, j].GetLetter());
+
+                        ++j;
+                    }
+                    boardSegList.AddLast(addedSeg);
+
+                }
+
+                
+
+            }
+        }
+        Console.WriteLine("going top to bottom");
+        for(int j = 0; j < board.GetLength(1); j++)
+        {
+            for(int i = 0; i < board.GetLength(0); i++)
+            {
+                //board[i, j] = new Tile(' ');
+
+                if (board[i, j].GetLetter() != ' ' ){
+                    Console.WriteLine("I: " + i + "J: " +j + " Letter: "+board[i, j].GetLetter());
+
+                    boardSeg addedSeg = new boardSeg();
+                    addedSeg.tiles = new LinkedList<Tile>();
+                    addedSeg.moves = new LinkedList<move>();
+
+
+                    //found a non blank letter
+                    while(board[i, j].GetLetter() != ' ' &&  i < board.GetLength(0)){
+                        addedSeg.tiles.AddLast(board[i,j]);
+                        Console.WriteLine("261 J: " +j +" letter: "+board[i, j].GetLetter());
+
+                        ++i;
+                    }
+                    boardSegList.AddLast(addedSeg);
+                }
+            }
+        }
+
+        Console.WriteLine("length: "+boardSegList.Count());
+        foreach (boardSeg bs in boardSegList){
+            foreach(Tile tl in bs.tiles){
+                Console.Write(tl.GetLetter());
+            }
+            Console.WriteLine("");
+        }
+
+
+    }
+
+    private void generatePossibleWords2(LinkedList<RackTile> aiRack, string boardString){
+            string addChars = "";
+            string CurrWord = "";
+            foreach (RackTile rt in aiRack)
+            {
+                addChars += rt.GetLetter();
+            }
+
+
+        //foreach (Tile bt in ) not sure why this is here maybe mistype?
+        generatePossibleWordsRec2(CurrWord ,addChars,boardString, false,false);
+        Console.WriteLine("done");
+    }
+
+     struct boardSeg{
+         public LinkedList<Tile> tiles;
+         public LinkedList<move> moves;
+        
+     }
+     struct move{
+        public string word;
+        public int wordScore;
+     }
+
+    //Crea
+
+
+    //recursive alg to generate possible moves for the ai
+
+    private void generatePossibleWordsRec2(string CurrentStr, string AddStr,string boardStr, bool boardStrAdded, bool addStrAdded)
+    {
+        //Console.WriteLine("called with curr: " +CurrentStr + " and addstr: "+AddStr);
+
+        if(AddStr.Length == 0 && boardStrAdded){
+            //Console.WriteLine(CurrentStr + ": " + allPossibleWordsTrie.Search(CurrentStr));
+            //Console.ReadLine();
+
+            if(allPossibleWordsTrie.Search(CurrentStr)){
+                Console.WriteLine(CurrentStr);
+                aiStrings.AddLast(CurrentStr);
+
+            }
+            return;
+        }
+        for(int i = 0; i < AddStr.Length;i++){
+            //errors when i = 0
+            //Console.WriteLine(AddStr + " to "+AddStr.Substring(0,i)+AddStr.Substring(i+1));
+            generatePossibleWordsRec2(CurrentStr+AddStr[i],AddStr.Substring(0,i)+AddStr.Substring(i+1),boardStr,boardStrAdded,true);
+        }
+        if (!boardStrAdded)
+        {
+            //Console.WriteLine("231");
+            generatePossibleWordsRec2(CurrentStr + boardStr, AddStr, boardStr, true, addStrAdded);
+            //Console.WriteLine("233");
+
+        }
+        if (addStrAdded && boardStrAdded){
+            generatePossibleWordsRec2(CurrentStr , "", boardStr, true, true);
+        }
+
+    }
+
+    //recursive alg to generate possible moves for the ai
+    private void generatePossibleWords(LinkedList<RackTile> aiRack)
+    {
+        LinkedList<RackTile> CurrentList = new LinkedList<RackTile>();
+
+        generatePossibleWordsRec(CurrentList, aiRack);
+    }
+    private void generatePossibleWordsRec(LinkedList<RackTile> CurrentList,LinkedList<RackTile> AddList){
+        if (AddList.Count() == 0)
+        {
+            string finalWord = "";
+            foreach (RackTile rt in CurrentList)
+            {
+                finalWord += rt.GetLetter();
+            }
+
+            Console.WriteLine(finalWord + ": " + allPossibleWordsTrie.Search(finalWord));
+            Console.ReadLine();
+
+        }
+
+        for (int i =0; i < AddList.Count();i++){
+            RackTile rt = AddList.First();
+            CurrentList.AddLast(rt);
+            AddList.Remove(rt);
+            string add = "";
+
+            foreach (RackTile rat in AddList)
+            {
+                add += rat.GetLetter();
+            }
+            Console.WriteLine(add);
+            generatePossibleWordsRec(CurrentList,AddList);
+            CurrentList.RemoveLast();
+            AddList.AddLast(rt);
+        }
+        //if currentlist not empty create a version where we end early 
+        //(we will not always be able to use all 7 racktiles)
+        if (CurrentList.Count() > 0)
+        {
+            LinkedList<RackTile> ZeroList = new LinkedList<RackTile>();
+            generatePossibleWordsRec(CurrentList, ZeroList);
+        }
+
+
+    }
+
 
     public void RefillRack(int ind)
     {
@@ -291,7 +641,7 @@ public class ScrabbleGame
         incomingWord.Clear();
         GoToNextTurn();
     }
-    private void SubmitIncomingWord()
+    private bool SubmitIncomingWord()
     {
         if(IsIncomingWordValid())
         {
@@ -331,12 +681,19 @@ public class ScrabbleGame
                 }
                 playerTurn = -1;
                 Console.WriteLine("Game Over");
+                return true;
             }
             else
+            {
                 GoToNextTurn();
+                return true;
+            }
         }
         else
+        {
             ResetIncomingWord();
+            return false;
+        }
     }
 
     private Point[] GetAdjacentTiles(Point boardSpot)
@@ -672,7 +1029,7 @@ public class ScrabbleGame
             }
             return false;
         }
-
+        //dk look here
         //construct list of forwards and backwards strings made from our placed tiles
         List<string> stringsBuilt = new List<string>();
         for(int i = 0; i < wordsBuilt.Count(); i++)
@@ -689,11 +1046,11 @@ public class ScrabbleGame
             Console.WriteLine("\"" + forwards + "\" or \"" + backwards + "\"");
         }
 
-        result = CheckStringsBuiltValidArr(stringsBuilt);
-        Console.WriteLine("result for arr : " + result);
+        //result = CheckStringsBuiltValidArr(stringsBuilt);
+        //Console.WriteLine("result for arr : " + result);
 
         result = CheckStringsBuiltValidTrie(stringsBuilt);
-        Console.WriteLine("result for tree : " + result);
+        Console.WriteLine("result for trie : " + result);
 
 
         if(result)
@@ -737,7 +1094,7 @@ public class ScrabbleGame
         return true;
     }
 
-    // takes list of built words and comapres them against the tree of legal words
+    // takes list of built words and comapres them against the trie of legal words
     //the dawg implimentation should be identical assuming evan impliments same function
         private bool CheckStringsBuiltValidTrie(List<string> stringsBuiltInp)
     {
