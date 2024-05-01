@@ -1,62 +1,67 @@
 ﻿using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.VisualBasic;
 
-/*
 // Fill the trie with words
 try
 {
 
-    Trie tree = new Trie();
+    Dawg dawg = new Dawg(); 
     StreamReader sr = new StreamReader("sampleWords.txt");
 
     string line = sr.ReadLine();
     while (line != null)
     {
-        tree.AddWord(line);
+        dawg.AddWord(line);
         line = sr.ReadLine();
     }
     sr.Close();
-    SerializeObj(tree);
+    SerializeObj(dawg);
+    
+    //Test if tree correctly identifies the words
+    dawg.CleanUp();
+}
+catch (Exception e)
+{
+    Console.WriteLine("Exception: " + e.Message);
+}
+// Deserialize the Trie from a file 
+/*
+try
+{
+    JsonSerializerOptions opts = new(){
+        ReferenceHandler = ReferenceHandler.Preserve
+    };
+    StreamReader sr = new StreamReader("sampleWords.txt");
+
+    StreamReader sr2 = new StreamReader("DawgSer.json");
+    string line = sr2.ReadLine();
+    Dawg? dawg = JsonSerializer.Deserialize<Dawg>(line,opts);
+    sr2.Close();
+    line = sr.ReadLine();
+    while (line != null)
+    {
+        Console.WriteLine("Trie recognizes word: " + line + "? " + dawg.Search(line));
+        line = sr.ReadLine();
+    }
+
+    sr.Close();
 }
 catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
 }
 */
-// Test if it correctly identifies those words later
 
-// Deserialize the Trie from a file 
-
-try
+static void SerializeObj(Dawg d)
 {
-
-    StreamReader sr = new StreamReader("sampleWords.txt");
-
-    StreamReader sr2 = new StreamReader("TrieSer.json");
-    string line = sr2.ReadLine();
-    Trie? tree = JsonSerializer.Deserialize<Trie>(line);
-    line = sr.ReadLine();
-    while (line != null)
+    JsonSerializerOptions opts = new()
     {
-        Console.WriteLine("Trie recognizes word: " + line + "? " + tree.Search(line));
-        line = sr.ReadLine();
-    }
-
-    Dawg newDawg = new Dawg(tree);
-    sr.Close();
-}
-catch (Exception e)
-{
-    Console.WriteLine("Exception: " + e.Message);
-}
-
-//SerializeObj(tree);
-
-static void SerializeObj(Trie t)
-{
-    string jsonString = JsonSerializer.Serialize(t);
-    Console.WriteLine(jsonString);
-    File.WriteAllText("TrieSer.json", jsonString);
+        ReferenceHandler = ReferenceHandler.Preserve
+    };
+    string jsonString = JsonSerializer.Serialize(d, opts);
+    //Console.WriteLine(jsonString);
+    File.WriteAllText("DawgSer.json", jsonString);
 }

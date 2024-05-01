@@ -1,34 +1,60 @@
 [Serializable]
 public class Trie
 {
-    public Node root { get; set; } = new Node();
-
+    public Node Root { get; set; } = new Node();
+    public HashSet<Node> FinalStates { get; set; } = [];
+    public HashSet<Node> AllStates { get; set; } = [];
     public void AddWord(string word)
     {
-        Node curNode = root;
+        Node curNode = Root;
 
         foreach (char c in word)
         {
-            if (!curNode.Children.ContainsKey(c))
+            if (curNode.Children.TryGetValue(c, out Node? value))
             {
-                curNode.Children.Add(c, new Node());
+                curNode = value;
             }
-            curNode = curNode.Children[c];
+            else
+            {
+                Node newNode = new()
+                {
+                    Parent = curNode,
+                    ParentChar = c
+                };
+                curNode.Children.Add(c, newNode);
+                curNode = curNode.Children[c];
+                AllStates.Add(curNode);
+            }
+
         }
         curNode.IsSuccessState = true;
+        if (!FinalStates.Add(curNode))
+        {
+            Console.WriteLine("Failed");
+        }
     }
 
-    public bool Search(string word)
+    // 0 = false,
+    // 1 = true,
+    // -1 = search "Fell Off" Trie
+    public int Search(string word)
     {
-        var curNode = root;
-        foreach (char c in word)
+        Node curNode = Root;
+        foreach (char c in word.Trim())
         {
-            if (!curNode.Children.ContainsKey(c))
+            if (!curNode.Children.TryGetValue(c, out Node? value))
             {
-                return false;
+                return -1;
             }
-            curNode = curNode.Children[c];
+            curNode = value;
         }
-        return curNode.IsSuccessState;
+        if (curNode.IsSuccessState)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }

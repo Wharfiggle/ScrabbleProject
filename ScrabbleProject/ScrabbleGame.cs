@@ -104,6 +104,11 @@ public class ScrabbleGame
     private LinkedList<boardSeg> boardSegList  = new LinkedList<boardSeg>();
     private LinkedList<string> aiStrings  = new LinkedList<string>();
 
+    private double bingoTime = 1.5;
+    private double bingoTimer = 0;
+    private double bingoFlashSpeed = 50;
+
+    private bool waitingForCPU = false;
 
     //constructor, information that needs to be accessed by other objects for the rest of the game should be set here
     public ScrabbleGame(Game1 game)
@@ -187,6 +192,8 @@ public class ScrabbleGame
         
         if(game.players[playerTurn] == "cpu")
         {
+            waitingForCPU = true;
+
             //dk edit here
             //cpu behavior
 
@@ -282,6 +289,7 @@ public class ScrabbleGame
             }
             Submit();
             */
+            waitingForCPU = false;
         }
     }
 
@@ -583,7 +591,10 @@ public class ScrabbleGame
     public void RemoveFromIncomingWord(RackTile rt)
     {
         incomingWord.Remove(rt);
-        board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+        if(rt.boardSpot != new Point(-1, -1))
+            board[rt.boardSpot.X, rt.boardSpot.Y].SetLetter(' ');
+        else
+            Console.WriteLine("RackTile being removed from IncomingWord had a boardSpot of (-1, -1). This shouldn't happen");
     }
     public void AddToIncomingSwap(RackTile rt)
     {
@@ -1140,7 +1151,11 @@ public class ScrabbleGame
         }
 
         if(addedTiles.Count >= 7) //bingo
+        {
             totalAddedPoints += 50;
+            bingoTimer = bingoTime;
+        }
+
         playerPoints[playerTurn] += totalAddedPoints;
         Console.WriteLine("Scored " + totalAddedPoints + " points!");
     }
@@ -1226,7 +1241,7 @@ public class ScrabbleGame
                 game.DrawRect(tilePos, new Vector2(squareSize, squareSize), false, -lineThickness, true, squareColor);
                 
                 //draw bonus text label
-                game.DrawStringCentered(game.fonts[3], bonus, tilePos + new Vector2(squareSize / 2, squareSize / 2), Color.White);
+                game.DrawStringCentered(game.fonts[4], bonus, tilePos + new Vector2(squareSize / 2, squareSize / 2), Color.White);
                 
                 //draw square border lines
                 game.DrawLine(tilePos, tilePos + new Vector2(squareSize, 0), lineThickness, new Color(115, 76, 35));
@@ -1342,6 +1357,26 @@ public class ScrabbleGame
         game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: true, thickness: -uiThickness, color: Color.Brown);
         game.DrawRect(pos: pointPos[3], size: pointSize, centered: true, filled: false, thickness: uiThickness, color: outlineColor);
         game.DrawStringCentered(font: game.fonts[0], str: playerPoints[3].ToString(), pointPos[3], color: Color.White);
+    }
+    //for drawing things on top of all objects instead of under them
+    public void DrawOnTop(GameTime gameTime, SpriteBatch _spriteBatch)
+    {
+        //flash bingo on the screen when a bingo is achieved
+        if(bingoTimer > 0)
+        {
+            bingoTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+            
+            float t = (float)(Math.Sin(bingoTimer * bingoFlashSpeed) + 1) / 2.0f;
+            t *= 0.8f;
+            Color flashColor = new Color(1.0f, 1.0f - t, 1.0f - t);
+
+            game.DrawStringCentered(font: game.fonts[7], str: "BINGO!", color: Color.Black);
+            game.DrawStringCentered(font: game.fonts[3], str: "BINGO!", color: flashColor);
+        }
+
+        //show message showing player that the cpu is still thinking
+        if(waitingForCPU)
+            game.DrawStringCentered(font: game.fonts[5], str: "Waiting for CPU...", color: new Color(0, 50, 0));
     }
 
     private void UpdateRackTilePositions(int ind)

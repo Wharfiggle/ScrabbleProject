@@ -84,8 +84,8 @@ public class Tile : GameObject
             game.DrawRect(pos: drawPos, size: GetSize(), centered: false, thickness: 2, filled: false, color: contourColor);
             if(letter != '?')
             {
-                game.DrawStringCentered(font: game.fonts[3], str: letter.ToString(), pos: GetPos() - GetSize() / 20, color: contourColor);
-                game.DrawStringCentered(font: game.fonts[5], str: pointValue.ToString(), pos: GetPos() + new Vector2(GetSize().X / 3, GetSize().Y / 4), color: contourColor);
+                game.DrawStringCentered(font: game.fonts[4], str: letter.ToString(), pos: GetPos() - GetSize() / 20, color: contourColor);
+                game.DrawStringCentered(font: game.fonts[6], str: pointValue.ToString(), pos: GetPos() + new Vector2(GetSize().X / 3, GetSize().Y / 4), color: contourColor);
             }
         }
     }
