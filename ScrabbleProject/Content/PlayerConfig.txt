@@ -1,4 +1,4 @@
 player
 player
 player
-player
+cpu

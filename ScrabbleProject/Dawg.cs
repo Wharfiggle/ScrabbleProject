@@ -53,14 +53,15 @@ public class Dawg
     {
         int commonPrefix = FindCommonPrefix(word);
         Minimize(commonPrefix);
-        Node curNode = uncheckedNodes.Count() == 0 ? Root : uncheckedNodes.Peek().Item3;
+        Node curNode = uncheckedNodes.Count == 0 ? Root : uncheckedNodes.Peek().Item3;
 
         foreach (char c in word.Substring(commonPrefix))
         {
             Node newNode = new()
             {
-                ParentChars = [c]
+                ParentChars = new List<char>(),
             };
+            newNode.ParentChars.Add(c);
             curNode.Children.Add(c, newNode);
             uncheckedNodes.Push(new Tuple<Node, char, Node>(curNode, c, newNode));
             curNode = newNode;
