@@ -689,13 +689,17 @@ public class ScrabbleGame
     private void generatePossibleWordsRec2(string CurrentStr, string AddStr, string boardStr, bool boardStrAdded, bool addStrAdded)
     {
         //Console.WriteLine("called with curr: " +CurrentStr + " and addstr: "+AddStr);
+        int accState = allPossibleWordsTrie.Search(CurrentStr);
 
+        if(accState == -1){
+            return;
+        }
         if (AddStr.Length == 0 && boardStrAdded)
         {
             //Console.WriteLine(CurrentStr + ": " + allPossibleWordsTrie.Search(CurrentStr));
             //Console.ReadLine();
 
-            if (allPossibleWordsTrie.Search(CurrentStr))
+            if (accState == 1)
             {
                 //Console.WriteLine(CurrentStr);
                 aiStrings.AddLast(CurrentStr);
@@ -1363,7 +1367,7 @@ public class ScrabbleGame
 
         for (int i = 0; i < stringsBuiltInp.Count; i += 2)
         {
-            if (allPossibleWordsTrie.Search(stringsBuiltInp[i]) || allPossibleWordsTrie.Search(stringsBuiltInp[i + 1]))
+            if (allPossibleWordsTrie.Search(stringsBuiltInp[i]) ==1 || allPossibleWordsTrie.Search(stringsBuiltInp[i + 1])==1)
             {
                 continue;
             }
