@@ -103,6 +103,7 @@ public class ScrabbleGame
 
     private LinkedList<boardSeg> boardSegList  = new LinkedList<boardSeg>();
     private LinkedList<string> aiStrings  = new LinkedList<string>();
+    int aiScore;
 
     private double bingoTime = 1.5;
     private double bingoTimer = 0;
@@ -222,61 +223,46 @@ public class ScrabbleGame
             */
 
 
-
-
-
-
-
             Console.WriteLine("start genning board segs");
             DereksMagicalFunctionFromHell();
             Console.WriteLine("stop genning board segs");
 
-            string bsStr;
+            Console.WriteLine("genning moves");
+            generateMoves();
+            Console.WriteLine("stop genning moves");
+
+
+            bool aiGuessSubmitted = false;
+
             foreach (boardSeg bs in boardSegList)
             {
-                aiStrings.Clear();
-                bsStr = "";
-                foreach (Tile tl in bs.tiles)
+                if (aiGuessSubmitted)
+                {break;}
+                foreach (move mv in bs.moves)
                 {
-                    bsStr += (tl.GetLetter());
+                    if (aiGuessSubmitted)
+                    {break;}
+                    Console.WriteLine("280: about to go in");
+                    aiGuessSubmitted = SubmitAiGuess(bs.tiles, mv.word);
                 }
-                Console.WriteLine("Board string for generating possible moves: " + bsStr);
-                generatePossibleWords2(playerRacks[playerTurn],bsStr);
-                string lastStr = "";
-                int points;
-                foreach(string gennedStr in aiStrings){
-                    if(gennedStr.Equals(lastStr)){
-                        continue;
-                    }
-                    points = getWordVal(gennedStr);
-                    if(points > 1){
-                        move thisMove = new move();
-                        //thisMove.moves = new LinkedList<move>();
-                        thisMove.word = gennedStr;
-                        thisMove.wordScore = points;
-                        Console.WriteLine("gennedStr: "+gennedStr+" points: " + points );
-                        bs.moves.AddFirst(thisMove); //huh
-                        lastStr = gennedStr;
-
-                    }
-
-                   
-                    
-
-                }
-
             }
 
-            foreach (boardSeg bs in boardSegList){
-                foreach(move mv in bs.moves){
-                    SubmitAiGuess(bs.tiles,mv.word);
-                }
+            // int wordsTried = 0;
+            // while (!aiGuessSubmitted)
+            // {
+            //     ++wordsTried;
+            //     if (wordsTried > 1000000){
+            //         Console.WriteLine("ai has tried over 1 Million words. Could you ask if he is ok?");
+            //         System.Environment.Exit(124);
+            //     }
+            //     aiGuessSubmitted = getBestMove();
+            // }
 
-            }
+
             //generatePossibleWords2(playerRacks[playerTurn],"S");
 
-            List<char> letters = new List<char>(); //placeholder for incoming letters to place
-            List<Point> boardSpots = new List<Point>(); //placeholder for the spots on the board to place them at
+            //List<char> letters = new List<char>(); //placeholder for incoming letters to place
+            //List<Point> boardSpots = new List<Point>(); //placeholder for the spots on the board to place them at
 
             /*
             foreach(RackTile rt in playerRacks[playerTurn])
@@ -293,14 +279,115 @@ public class ScrabbleGame
         }
     }
 
+    // unsafe public bool getBestMove()
+    // {
+    //     int bestScore;
+
+
+
+    //         for(LinkedListNode<boardSeg> bs = boardSegList.First; bs!=null ;bs = bs.Next)
+    //         {
+
+    //             for(LinkedListNode<move> mve = bs.Value.moves.First; mve !=null ;mve = mve.Next){
+
+    //                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
+    //                 if (bs == boardSegList.First && mve == bs.Value.moves.First){
+                        
+    //                 }
+    //                 if (mve.Value.wordScore >= i)
+    //                 {
+    //                     Console.WriteLine("292: found something that goes ");
+    //                     segPtr = &bs.tiles;
+    //                     mve.wordScore = 0;
+    //                     wordStr = mve.word;
+    //                 }
+
+
+
+    //             }
+    //         }
+
+    //         if (segPtr == null)
+    //         {
+    //             Console.WriteLine("ln296:  error did not find a move:seg");
+    //             System.Environment.Exit(123);
+    //         }
+    //         if (wordStr == null)
+    //         {
+    //             Console.WriteLine("ln296:  error did not find a move:wordstring");
+    //             System.Environment.Exit(123);
+    //         }
+    //         if (scorePtr == null)
+    //         {
+    //             Console.WriteLine("ln296:  error did not find a move:score");
+    //             System.Environment.Exit(123);
+    //         }
+
+    //         if (*scorePtr == 0)
+    //         {
+    //             Console.WriteLine("301: Ai could not find valid word");
+    //             System.Environment.Exit(123);
+    //         }
+    //         Console.WriteLine("ln322: score = " + *scorePtr);
+
+
+    //         *scorePtr = 0;
+    //         return SubmitAiGuess(*segPtr, wordStr);
+
+
+
+
+    // }
+
+    public void generateMoves()
+    {
+        string bsStr;
+        aiScore = 0;
+        foreach (boardSeg bs in boardSegList)
+        {
+            aiStrings.Clear();
+            bsStr = "";
+            foreach (Tile tl in bs.tiles)
+            {
+                bsStr += (tl.GetLetter());
+            }
+            Console.WriteLine("Board string for generating possible moves: " + bsStr);
+            generatePossibleWords2(playerRacks[playerTurn], bsStr);
+            string lastStr = "";
+            int points;
+            foreach (string gennedStr in aiStrings)
+            {
+                if (gennedStr.Equals(lastStr))
+                {
+                    continue;
+                }
+                points = getWordVal(gennedStr);
+                if (points > 1)
+                {
+                    move thisMove = new move();
+                    //thisMove.moves = new LinkedList<move>();
+                    thisMove.word = gennedStr;
+                    thisMove.wordScore = points;
+                    Console.WriteLine("gennedStr: "+gennedStr+" points: " + points );
+                    bs.moves.AddFirst(thisMove); //huh
+                    lastStr = gennedStr;
+                    if (points > aiScore)
+                    {
+                        aiScore = points;
+
+                    }
+                }
+            }
+        }
+    }
+
     public bool SubmitAiGuess(LinkedList<Tile> tilesIn, string inputStr){
         
         Console.WriteLine("AI guess for:");
         foreach(Tile tl in tilesIn){
             Console.WriteLine(tl.GetLetter() + " " + tl.boardSpot.ToString());
         }
-        Console.WriteLine("leaving ai guess");
-        return false;//dk remove this
+        //return false; //dk remove this
 
         bool horSeg = true;
         bool vertSeg = true;
@@ -316,37 +403,57 @@ public class ScrabbleGame
 
             boardSeg += tle.GetLetter();
 
-            if (tle.boardSpot.X != xVal){ horSeg = false;}
-            if (tle.boardSpot.Y != yVal){ vertSeg = false;}
+            if (tle.boardSpot.X != xVal){ vertSeg = false;}
+            if (tle.boardSpot.Y != yVal){ horSeg = false;}
         }
+        Console.WriteLine("board seg: " + boardSeg + "  inputStr: "+ inputStr);
 
         int brdIndx = inputStr.IndexOf(boardSeg);
         int brdEndIndex = (brdIndx +  tilesIn.Count() - 1);
+        Console.WriteLine("brdIndx: " + brdIndx+ "  brdEndIndex: "+brdEndIndex);
 
         if (brdIndx < 0){
             Console.WriteLine("ln304 ERROR seg not found");
             return false;
         }
 
-        if(!horSeg && vertSeg){
+        if (vertSeg && horSeg)
+        {
+            Console.WriteLine("line 342 couldnt decide hor/vertseg");
+            if(tilesIn.First().vertWord.Count()==0){
+                horSeg = false;
+            }
+            if(tilesIn.First().horWord.Count()==0){
+                vertSeg = false;
+            }
+        }
+        Console.WriteLine("horseg: "+horSeg+ "  vertseg: "+vertSeg);
+        if (!horSeg && vertSeg){
             //xVal should be constant
             for (int iter = 0; iter < inputStr.Length && iter < 15 ; iter++){
+                Console.WriteLine("379: iter = "+iter);
+
                 if(iter >= brdIndx && iter <= brdEndIndex){
-                    ++iter;
+                    continue;
                 }
+                Console.WriteLine("383: iter = " + iter);
+
                 if (iter >= 15){
                     continue;
                 }
                 // check see if position open
-                yVal = tilesIn.First().boardSpot.Y - brdIndx;
-                if (board[xVal,yVal]!=null){
-                    Console.WriteLine("ocupied space found");
+                yVal = tilesIn.First().boardSpot.Y - (brdIndx-iter);
+                Console.WriteLine("368: yVal = " + yVal);
+
+                if (board[xVal,yVal].GetLetter()!= ' '){ 
+                    Console.WriteLine("362 ocupied space found");
                     return false;
                 }
 
                 foreach(RackTile rtle in playerRacks[playerTurn]){
                     if (rtle.GetLetter() == inputStr[iter] && rtle.boardSpot.Y == -1){
-                        
+                        Console.WriteLine("adding racktile " + rtle.GetLetter() + " to " +xVal + " , " +yVal);
+                        rtle.AddToIncomingWord(board[xVal,yVal].boardSpot);
                     };
                 }
 
@@ -354,18 +461,43 @@ public class ScrabbleGame
 
         }
         else if(!vertSeg && horSeg){
+            //yVal is constant
+            for (int iter = 0; iter < inputStr.Length && iter < 15 ; iter++){
+                Console.WriteLine("445: iter = "+iter);
+                if(iter >= brdIndx && iter <= brdEndIndex){
+                    continue;
+                }
+                Console.WriteLine("449: iter = "+iter);
+                if (iter >= 15){
+                    continue;
+                }
+                // check see if position open
+                xVal = tilesIn.First().boardSpot.X - (brdIndx-iter);
+                Console.WriteLine("368: xVal = " + xVal);
+
+                if (board[xVal,yVal].GetLetter()!= ' '){
+                    Console.WriteLine("388 ocupied space found");
+                    return false;
+                }
+
+                foreach(RackTile rtle in playerRacks[playerTurn]){
+                    if (rtle.GetLetter() == inputStr[iter] && rtle.boardSpot.X == -1){
+                        Console.WriteLine("adding racktile " + rtle.GetLetter() + " to " +xVal + " , " +yVal);
+                        rtle.AddToIncomingWord(board[xVal,yVal].boardSpot);
+                    };
+                }
+
+            }
+
 
         }
-        else if(vertSeg && horSeg){
-            Console.WriteLine("ln315 ERROR both seg");
-
-        }else{
+        else{
             Console.WriteLine("ln318 ERROR neither seg");
+            return false;
         }
 
-
-
-        return false;
+        bool submitted = SubmitIncomingWord();
+        return submitted;
     }
 
     public int getWordVal(string strIn){
@@ -459,7 +591,7 @@ public class ScrabbleGame
 
         //foreach (Tile bt in ) not sure why this is here maybe mistype?
         generatePossibleWordsRec2(CurrWord ,addChars,boardString, false,false);
-        Console.WriteLine("done");
+        Console.WriteLine("gen words done");
     }
 
      struct boardSeg{
@@ -486,7 +618,7 @@ public class ScrabbleGame
             //Console.ReadLine();
 
             if(allPossibleWordsTrie.Search(CurrentStr)){
-                Console.WriteLine(CurrentStr);
+                //Console.WriteLine(CurrentStr);
                 aiStrings.AddLast(CurrentStr);
 
             }
