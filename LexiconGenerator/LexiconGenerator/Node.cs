@@ -5,10 +5,11 @@ using System.Collections.Generic;
 public class Node : IEquatable<Node>
 {
     public bool IsSuccessState { get; set; } = false;
-    public Node? Parent {get; set;} = null;
+    //public Node? Parent {get; set;} = null;
  
     // Denotes the Character on the edge leading into the node
-    public char ParentChar {get; set;}
+    //public char ParentChar {get; set;}
+    public List<char> ParentChars {get; set;} = [];
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Denotes the char that the transition from the parent is on.
@@ -20,7 +21,7 @@ public class Node : IEquatable<Node>
         {
             return false;
         }
-        if (other.ParentChar != ParentChar){
+        if (other.ParentChars != ParentChars){
             return false;
         }
         string mySubtree = findSubtreeString(this);
@@ -35,20 +36,15 @@ public class Node : IEquatable<Node>
         {
             if (root.Children.TryGetValue(c, out Node? value))
             {
-                // Stops an infinite loop caused by the dead node 
-                if (value.ParentChar == '\0')
-                {
-                    result += '0';
+                
+                foreach (char character in value.ParentChars) {
+                    result += character;
                 }
-                else
-                {
-                    result += value.ParentChar;
-                    findSubtreeString(value);
-                }
+                findSubtreeString(value);
             }
         }
         return result;
     }
     public override bool Equals(object? obj) => Equals(obj as Node);
-    public override int GetHashCode() => (IsSuccessState, ParentChar, Parent).GetHashCode();
+    public override int GetHashCode() => (IsSuccessState, ParentChars).GetHashCode();
 }

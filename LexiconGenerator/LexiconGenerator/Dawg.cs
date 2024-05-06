@@ -23,6 +23,10 @@ public class Dawg
         minimizedNodes.Clear();
     }
 
+    // return values:
+    // -1 : means we tried to leave the Dawg while searching
+    // 0 : menas we ended on a fail state
+    // 1 : means we ended on a success state
     public int Search(string word)  {
         Node curNode = Root;
         foreach (char c in word.Trim())
@@ -46,11 +50,10 @@ public class Dawg
         int commonPrefix = FindCommonPrefix(word);
         Minimize(commonPrefix);
         Node curNode = uncheckedNodes.Count() == 0 ? Root : uncheckedNodes.Peek().Item3; 
-        string part = word.Substring(commonPrefix) ;
         foreach (char c in word.Substring(commonPrefix)){
                 Node newNode = new(){
-                    Parent = curNode,
-                    ParentChar = c
+                    //Parent = curNode,
+                    ParentChars = [c]
                 };
                 curNode.Children.Add(c, newNode);
                 uncheckedNodes.Push(new Tuple<Node, char, Node>(curNode, c, newNode));
@@ -59,6 +62,8 @@ public class Dawg
         curNode.IsSuccessState = true;
         previousWord = word;
     }
+
+    // Returns the index pointing to the last letter in the common prefix between two words
     private int FindCommonPrefix(string word) {
         int searchLength = word.Length < previousWord.Length ? word.Length : previousWord.Length;
         int commonPrefix = 0; 
@@ -82,10 +87,14 @@ public class Dawg
             if(minimizedNodes.Contains(childNode)){
                 if(parentNode.Children.ContainsKey(character)){
                     parentNode.Children[character] = childNode;
-                } else{
-                    parentNode.Children.Add(character, childNode);
                 }
-            } else { // node is alerady minimized so we can continue
+                 else{
+                    parentNode.Children.Add(character, childNode);
+                    if(!childNode.ParentChars.Contains(character)) {
+                        childNode.ParentChars.Add(character);
+                    }
+                }
+            } else { // node is already minimized so we can continue
                 minimizedNodes.Add(childNode);
             }
         }
