@@ -255,13 +255,28 @@ public class ScrabbleGame
             // int wordsTried = 0;
             // while (!aiGuessSubmitted)
             // {
-            //     ++wordsTried;
-            //     if (wordsTried > 1000000){
-            //         Console.WriteLine("ai has tried over 1 Million words. Could you ask if he is ok?");
-            //         System.Environment.Exit(124);
+            //     if (aiGuessSubmitted)
+            //     {break;}
+            //     foreach (move mv in bs.moves)
+            //     {
+            //         if (aiGuessSubmitted)
+            //         {break;}
+            //         Console.WriteLine("280: about to go in");
+            //         aiGuessSubmitted = SubmitAiGuess(bs.tiles, mv.word);
             //     }
-            //     aiGuessSubmitted = getBestMove();
             // }
+
+            int wordsTried = 0;
+            while (!aiGuessSubmitted)
+            {
+                ++wordsTried;
+                if (wordsTried > 1000000)
+                {
+                    Console.WriteLine("ai has tried over 1 Million words. Could you ask if he is ok?");
+                    System.Environment.Exit(124);
+                }
+                aiGuessSubmitted = getBestMove();
+            }
 
 
             //generatePossibleWords2(playerRacks[playerTurn],"S");
@@ -280,69 +295,93 @@ public class ScrabbleGame
             }
             Submit();
             */
+
             waitingForCPU = false;
         }
     }
 
-    // unsafe public bool getBestMove()
-    // {
-    //     int bestScore;
+    public bool getBestMove()
+    {
+
+        LinkedListNode<boardSeg> bestbs = boardSegList.First;
+        LinkedListNode<move> bestmve = bestbs.Value.moves.First;
+        for (LinkedListNode<boardSeg> bs = boardSegList.First; bs != null; bs = bs.Next)
+        {
+
+            for (LinkedListNode<move> mve = bs.Value.moves.First; mve != null; mve = mve.Next)
+            {
+                //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
+
+                if (mve.Value.wordScore > bestmve.Value.wordScore)
+                {
+                    Console.WriteLine("292: found something that goes ");
+                    bestbs = bs;
+                    bestmve = mve;
+                }
+            }
+        }
+        if (bestmve.Value.wordScore == 0)
+        {
+            Console.WriteLine("301: Ai could not find valid word");
+            System.Environment.Exit(123);
+        }
+        Console.WriteLine("ln322: score = " + bestmve.Value.wordScore);
+        //string tstr = bestmve.Value.word;
+        //bestmve.Value = new move { word = tstr, wordScore = 0 }; // Modify the copy within the collection
+
+        bool returnVal = SubmitAiGuess(bestbs.Value.tiles, bestmve.Value.word);
+
+        //                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
+        //                 if (bs == boardSegList.First && mve == bs.Value.moves.First){
+
+        //                 }
+        //                 if (mve.Value.wordScore >= i)
+        //                 {
+        //                     Console.WriteLine("292: found something that goes ");
+        //                     segPtr = &bs.tiles;
+        //                     mve.wordScore = 0;
+        //                     wordStr = mve.word;
+        //                 }
 
 
 
-    //         for(LinkedListNode<boardSeg> bs = boardSegList.First; bs!=null ;bs = bs.Next)
-    //         {
+        //             }
+        //         }
 
-    //             for(LinkedListNode<move> mve = bs.Value.moves.First; mve !=null ;mve = mve.Next){
+        //         if (segPtr == null)
+        //         {
+        //             Console.WriteLine("ln296:  error did not find a move:seg");
+        //             System.Environment.Exit(123);
+        //         }
+        //         if (wordStr == null)
+        //         {
+        //             Console.WriteLine("ln296:  error did not find a move:wordstring");
+        //             System.Environment.Exit(123);
+        //         }
+        //         if (scorePtr == null)
+        //         {
+        //             Console.WriteLine("ln296:  error did not find a move:score");
+        //             System.Environment.Exit(123);
+        //         }
 
-    //                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
-    //                 if (bs == boardSegList.First && mve == bs.Value.moves.First){
-
-    //                 }
-    //                 if (mve.Value.wordScore >= i)
-    //                 {
-    //                     Console.WriteLine("292: found something that goes ");
-    //                     segPtr = &bs.tiles;
-    //                     mve.wordScore = 0;
-    //                     wordStr = mve.word;
-    //                 }
-
-
-
-    //             }
-    //         }
-
-    //         if (segPtr == null)
-    //         {
-    //             Console.WriteLine("ln296:  error did not find a move:seg");
-    //             System.Environment.Exit(123);
-    //         }
-    //         if (wordStr == null)
-    //         {
-    //             Console.WriteLine("ln296:  error did not find a move:wordstring");
-    //             System.Environment.Exit(123);
-    //         }
-    //         if (scorePtr == null)
-    //         {
-    //             Console.WriteLine("ln296:  error did not find a move:score");
-    //             System.Environment.Exit(123);
-    //         }
-
-    //         if (*scorePtr == 0)
-    //         {
-    //             Console.WriteLine("301: Ai could not find valid word");
-    //             System.Environment.Exit(123);
-    //         }
-    //         Console.WriteLine("ln322: score = " + *scorePtr);
+        //         if (*scorePtr == 0)
+        //         {
+        //             Console.WriteLine("301: Ai could not find valid word");
+        //             System.Environment.Exit(123);
+        //         }
+        //         Console.WriteLine("ln322: score = " + *scorePtr);
 
 
-    //         *scorePtr = 0;
-    //         return SubmitAiGuess(*segPtr, wordStr);
+        //         *scorePtr = 0;
+        //         return SubmitAiGuess(*segPtr, wordStr);
 
 
 
 
-    // }
+        // }
+        boardSegList.Find(bestbs.Value).Value.moves.Remove(bestmve.Value);
+        return returnVal;
+    }
 
     public void generateMoves()
     {
@@ -638,8 +677,8 @@ public class ScrabbleGame
     }
     struct move
     {
-        public string word;
-        public int wordScore;
+        public string word { get; set; }
+        public int wordScore { get; set; }
     }
 
     //Crea
