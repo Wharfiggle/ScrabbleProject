@@ -618,53 +618,6 @@ public class ScrabbleGame
 
     }
 
-    //recursive alg to generate possible moves for the ai
-    private void generatePossibleWords(LinkedList<RackTile> aiRack)
-    {
-        LinkedList<RackTile> CurrentList = new LinkedList<RackTile>();
-
-        generatePossibleWordsRec(CurrentList, aiRack);
-    }
-    private void generatePossibleWordsRec(LinkedList<RackTile> CurrentList,LinkedList<RackTile> AddList){
-        if (AddList.Count() == 0)
-        {
-            string finalWord = "";
-            foreach (RackTile rt in CurrentList)
-            {
-                finalWord += rt.GetLetter();
-            }
-
-            Console.WriteLine(finalWord + ": " + allPossibleWordsTrie.Search(finalWord));
-            Console.ReadLine();
-
-        }
-
-        for (int i =0; i < AddList.Count();i++){
-            RackTile rt = AddList.First();
-            CurrentList.AddLast(rt);
-            AddList.Remove(rt);
-            string add = "";
-
-            foreach (RackTile rat in AddList)
-            {
-                add += rat.GetLetter();
-            }
-            Console.WriteLine(add);
-            generatePossibleWordsRec(CurrentList,AddList);
-            CurrentList.RemoveLast();
-            AddList.AddLast(rt);
-        }
-        //if currentlist not empty create a version where we end early 
-        //(we will not always be able to use all 7 racktiles)
-        if (CurrentList.Count() > 0)
-        {
-            LinkedList<RackTile> ZeroList = new LinkedList<RackTile>();
-            generatePossibleWordsRec(CurrentList, ZeroList);
-        }
-
-
-    }
-
 
     public void RefillRack(int ind)
     {
