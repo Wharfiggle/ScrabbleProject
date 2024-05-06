@@ -9,8 +9,7 @@ try
 {
 
     Dawg dawg = new Dawg(); 
-    StreamReader sr = new StreamReader("sampleWords.txt");
-
+    StreamReader sr = new StreamReader("testWords.txt");
     string line = sr.ReadLine();
     while (line != null)
     {
@@ -18,10 +17,20 @@ try
         line = sr.ReadLine();
     }
     sr.Close();
-    SerializeObj(dawg);
+    dawg.CleanUp();
+   
+   // SerializeObj(dawg);
     
     //Test if tree correctly identifies the words
-    dawg.CleanUp();
+    StreamReader sr2 = new StreamReader("testWords.txt");
+    line = sr2.ReadLine();
+    while (line != null)
+    {
+        Console.WriteLine("Trie recognizes word: " + line + "? " + dawg.Search(line));
+        line = sr2.ReadLine();
+    }
+
+    sr2.Close();
 }
 catch (Exception e)
 {
