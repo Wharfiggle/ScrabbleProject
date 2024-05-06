@@ -5,24 +5,25 @@ using System.Text.Json.Serialization;
 using Microsoft.VisualBasic;
 
 // Fill the trie with words
-try
+/*try
 {
 
-    Dawg dawg = new Dawg(); 
-    StreamReader sr = new StreamReader("testWords.txt");
+    Dawg dawg = new Dawg();
+    StreamReader sr = new StreamReader("SampleWords.txt");
     string line = sr.ReadLine();
     while (line != null)
     {
+      //  Console.WriteLine("Adding" + line);
         dawg.AddWord(line);
         line = sr.ReadLine();
     }
     sr.Close();
     dawg.CleanUp();
-   
-   // SerializeObj(dawg);
-    
+
+    SerializeObj(dawg);
+
     //Test if tree correctly identifies the words
-    StreamReader sr2 = new StreamReader("testWords.txt");
+    StreamReader sr2 = new StreamReader("SampleWords.txt");
     line = sr2.ReadLine();
     while (line != null)
     {
@@ -35,19 +36,19 @@ try
 catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
-}
+} */
 // Deserialize the Trie from a file 
-/*
 try
 {
-    JsonSerializerOptions opts = new(){
+    JsonSerializerOptions opts = new()
+    {
         ReferenceHandler = ReferenceHandler.Preserve
     };
-    StreamReader sr = new StreamReader("sampleWords.txt");
+    StreamReader sr = new StreamReader("SampleWords.txt");
 
     StreamReader sr2 = new StreamReader("DawgSer.json");
     string line = sr2.ReadLine();
-    Dawg? dawg = JsonSerializer.Deserialize<Dawg>(line,opts);
+    Dawg? dawg = JsonSerializer.Deserialize<Dawg>(line, opts);
     sr2.Close();
     line = sr.ReadLine();
     while (line != null)
@@ -62,7 +63,6 @@ catch (Exception e)
 {
     Console.WriteLine("Exception: " + e.Message);
 }
-*/
 
 static void SerializeObj(Dawg d)
 {

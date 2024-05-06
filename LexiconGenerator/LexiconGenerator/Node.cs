@@ -5,11 +5,10 @@ using System.Collections.Generic;
 public class Node : IEquatable<Node>
 {
     public bool IsSuccessState { get; set; } = false;
-    //public Node? Parent {get; set;} = null;
- 
+
     // Denotes the Character on the edge leading into the node
     //public char ParentChar {get; set;}
-    public List<char> ParentChars {get; set;} = [];
+    public List<char> ParentChars { get; set; } = [];
     private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
     // Denotes the char that the transition from the parent is on.
@@ -21,7 +20,8 @@ public class Node : IEquatable<Node>
         {
             return false;
         }
-        if (other.ParentChars != ParentChars){
+        if (other.ParentChars != ParentChars)
+        {
             return false;
         }
         string mySubtree = findSubtreeString(this);
@@ -36,8 +36,9 @@ public class Node : IEquatable<Node>
         {
             if (root.Children.TryGetValue(c, out Node? value))
             {
-                
-                foreach (char character in value.ParentChars) {
+
+                foreach (char character in value.ParentChars)
+                {
                     result += character;
                 }
                 findSubtreeString(value);
