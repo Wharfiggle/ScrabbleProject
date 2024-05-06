@@ -1,14 +1,13 @@
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
+using System;
+using System.Collections.Generic;
 
-[Serializable]
 
 public class Dawg
 {
     public Node Root { get; set; } = new Node();
 
-    private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    private readonly char[] charSet = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
     // Stack keeps track of the transition into the unchecked node in the form of Parent, character, Child
     private Stack<Tuple<Node, char, Node>> uncheckedNodes = new();

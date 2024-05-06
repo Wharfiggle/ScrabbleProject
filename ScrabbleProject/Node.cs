@@ -8,9 +8,9 @@ public class Node : IEquatable<Node>
 
     // Denotes the Character on the edge leading into the node
     //public char ParentChar {get; set;}
-    public List<char> ParentChars { get; set; } = [];
-    private readonly char[] charSet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    public List<char> ParentChars { get; set; } = new List<char>();
+    private readonly char[] charSet = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
     // Denotes the char that the transition from the parent is on.
     public Dictionary<char, Node> Children { get; set; } = new Dictionary<char, Node>();
 
