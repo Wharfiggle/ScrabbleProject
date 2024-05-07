@@ -167,7 +167,7 @@ public class ScrabbleGame
         {
             ReferenceHandler = ReferenceHandler.Preserve,
         };
-        StreamReader sr = new StreamReader("DawgSer.json");
+        StreamReader sr = new StreamReader("../../../Content/DawgSer.json");
         string line = sr.ReadLine();
         allPossibleWordsTrie = JsonSerializer.Deserialize<Dawg>(line, opts);
 
