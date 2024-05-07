@@ -1,3 +1,5 @@
+Formal Language Project created by: Derek Kedrowski, Elijah, and Evan
+
 To run, open the ScrabbleProject/ScrabbleProject folder in vscode, install the required extensions, click on one of the .cs files, 
 then hit the expand arrow on the play button at the top right and click "Run project associated with this file."
 
@@ -9,6 +11,7 @@ MonoGame Content Builder (Editor) -mangrimen
 
 
 If you want to change the number of players or change the distribution of human players, you can navigate to the ScrabbleProject/ScrabbleProject/Content/PlayerConfig.txt file and edit each line appropriately.
+*note: the first player must be a 'player' not a 'cpu'
 "player" = a human player
 "cpu" = an AI controlled player
 "none" = no player
