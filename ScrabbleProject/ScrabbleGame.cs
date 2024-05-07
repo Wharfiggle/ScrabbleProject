@@ -313,6 +313,10 @@ public class ScrabbleGame
             for (LinkedListNode<move> mve = bs.Value.moves.First; mve != null; mve = mve.Next)
             {
                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
+                if(mve == null ||bestmve == null){
+                    Console.WriteLine("317 null move error");
+                    return false;
+                }
 
                 if (mve.Value.wordScore > bestmve.Value.wordScore)
                 {
