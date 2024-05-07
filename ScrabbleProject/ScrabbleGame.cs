@@ -449,14 +449,14 @@ public class ScrabbleGame
                     continue;
                 }
                 Console.WriteLine("383: iter = " + iter);
-
-                if (iter >= 15)
+                yVal = tilesIn.First().boardSpot.Y - (brdIndx - iter);
+                Console.WriteLine("368: yVal = " + yVal);
+                if (iter >= 15 || yVal >= 15 ||yVal < 15)
                 {
                     continue;
                 }
                 // check see if position open
-                yVal = tilesIn.First().boardSpot.Y - (brdIndx - iter);
-                Console.WriteLine("368: yVal = " + yVal);
+
 
                 if (board[xVal, yVal].GetLetter() != ' ')
                 {
@@ -487,13 +487,14 @@ public class ScrabbleGame
                     continue;
                 }
                 Console.WriteLine("449: iter = " + iter);
-                if (iter >= 15)
+                xVal = tilesIn.First().boardSpot.X - (brdIndx - iter);
+                Console.WriteLine("368: xVal = " + xVal);
+                if (iter >= 15 || xVal >= 15|| xVal < 0)
                 {
                     continue;
                 }
                 // check see if position open
-                xVal = tilesIn.First().boardSpot.X - (brdIndx - iter);
-                Console.WriteLine("368: xVal = " + xVal);
+
 
                 if (board[xVal, yVal].GetLetter() != ' ')
                 {
