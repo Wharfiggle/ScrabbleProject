@@ -319,6 +319,7 @@ public class ScrabbleGame
                 // }
                 if(bestmve == null){
                     Console.WriteLine("317 null move error");
+                    bestmve = mve;
                     continue;
                 }
                 
@@ -343,6 +344,9 @@ public class ScrabbleGame
         bool returnVal = SubmitAiGuess(bestbs.Value.tiles, bestmve.Value.word);
 
         if (!returnVal){
+
+            //LinkedListNode<move> temp = 
+
             boardSegList.Find(bestbs.Value).Value.moves.Remove(bestmve.Value);
         }
 
@@ -516,6 +520,7 @@ public class ScrabbleGame
                     {
                         Console.WriteLine("adding racktile " + rtle.GetLetter() + " to " + xVal + " , " + yVal);
                         rtle.AddToIncomingWord(board[xVal, yVal].boardSpot);
+                        break;
                     };
                 }
 
