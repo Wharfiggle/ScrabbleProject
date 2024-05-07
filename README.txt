@@ -1,4 +1,4 @@
-Formal Language Project created by: Derek Kedrowski, Elijah, and Evan Dewitt
+Formal Language Project created by: Derek Kedrowski, Elijah Southman, and Evan Dewitt
 
 To run, open the ScrabbleProject/ScrabbleProject folder in vscode, install the required extensions, click on one of the .cs files, 
 then hit the expand arrow on the play button at the top right and click "Run project associated with this file."
