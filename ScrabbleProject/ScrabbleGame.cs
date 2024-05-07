@@ -167,7 +167,7 @@ public class ScrabbleGame
         {
             ReferenceHandler = ReferenceHandler.Preserve,
         };
-        StreamReader sr = new StreamReader("./Content/DawgSer.json");
+        StreamReader sr = new StreamReader("DawgSer.json");
         string line = sr.ReadLine();
         allPossibleWordsTrie = JsonSerializer.Deserialize<Dawg>(line, opts);
 
@@ -240,6 +240,20 @@ public class ScrabbleGame
             bool aiGuessSubmitted = false;
 
             // foreach (boardSeg bs in boardSegList)
+            // {
+            //     if (aiGuessSubmitted)
+            //     { break; }
+            //     foreach (move mv in bs.moves)
+            //     {
+            //         if (aiGuessSubmitted)
+            //         { break; }
+            //         Console.WriteLine("280: about to go in");
+            //         aiGuessSubmitted = SubmitAiGuess(bs.tiles, mv.word);
+            //     }
+            // }
+
+            // int wordsTried = 0;
+            // while (!aiGuessSubmitted)
             // {
             //     if (aiGuessSubmitted)
             //     { break; }
@@ -632,7 +646,8 @@ public class ScrabbleGame
         //Console.WriteLine("called with curr: " +CurrentStr + " and addstr: "+AddStr);
         int accState = allPossibleWordsTrie.Search(CurrentStr);
 
-        if(accState == -1){
+        if (accState == -1)
+        {
             return;
         }
         if (AddStr.Length == 0 && boardStrAdded)
@@ -1308,7 +1323,7 @@ public class ScrabbleGame
 
         for (int i = 0; i < stringsBuiltInp.Count; i += 2)
         {
-            if (allPossibleWordsTrie.Search(stringsBuiltInp[i]) ==1 || allPossibleWordsTrie.Search(stringsBuiltInp[i + 1])==1)
+            if (allPossibleWordsTrie.Search(stringsBuiltInp[i]) == 1 || allPossibleWordsTrie.Search(stringsBuiltInp[i + 1]) == 1)
             {
                 continue;
             }
