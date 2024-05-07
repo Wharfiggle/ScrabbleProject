@@ -256,15 +256,17 @@ public class ScrabbleGame
             // while (!aiGuessSubmitted)
             // {
             //     if (aiGuessSubmitted)
-            //     {break;}
+            //     { break; }
             //     foreach (move mv in bs.moves)
             //     {
             //         if (aiGuessSubmitted)
-            //         {break;}
+            //         { break; }
             //         Console.WriteLine("280: about to go in");
             //         aiGuessSubmitted = SubmitAiGuess(bs.tiles, mv.word);
             //     }
             // }
+
+
 
             int wordsTried = 0;
             while (!aiGuessSubmitted)
@@ -331,54 +333,7 @@ public class ScrabbleGame
 
         bool returnVal = SubmitAiGuess(bestbs.Value.tiles, bestmve.Value.word);
 
-        //                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
-        //                 if (bs == boardSegList.First && mve == bs.Value.moves.First){
 
-        //                 }
-        //                 if (mve.Value.wordScore >= i)
-        //                 {
-        //                     Console.WriteLine("292: found something that goes ");
-        //                     segPtr = &bs.tiles;
-        //                     mve.wordScore = 0;
-        //                     wordStr = mve.word;
-        //                 }
-
-
-
-        //             }
-        //         }
-
-        //         if (segPtr == null)
-        //         {
-        //             Console.WriteLine("ln296:  error did not find a move:seg");
-        //             System.Environment.Exit(123);
-        //         }
-        //         if (wordStr == null)
-        //         {
-        //             Console.WriteLine("ln296:  error did not find a move:wordstring");
-        //             System.Environment.Exit(123);
-        //         }
-        //         if (scorePtr == null)
-        //         {
-        //             Console.WriteLine("ln296:  error did not find a move:score");
-        //             System.Environment.Exit(123);
-        //         }
-
-        //         if (*scorePtr == 0)
-        //         {
-        //             Console.WriteLine("301: Ai could not find valid word");
-        //             System.Environment.Exit(123);
-        //         }
-        //         Console.WriteLine("ln322: score = " + *scorePtr);
-
-
-        //         *scorePtr = 0;
-        //         return SubmitAiGuess(*segPtr, wordStr);
-
-
-
-
-        // }
         boardSegList.Find(bestbs.Value).Value.moves.Remove(bestmve.Value);
         return returnVal;
     }
