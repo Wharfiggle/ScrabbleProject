@@ -313,10 +313,15 @@ public class ScrabbleGame
             for (LinkedListNode<move> mve = bs.Value.moves.First; mve != null; mve = mve.Next)
             {
                 //Console.WriteLine("289: currscore: " + *scorePtr + "  incoming: " + mve.wordScore);
-                if(mve == null ||bestmve == null){
+                // if(mve == null ||bestmve == null){
+                //     Console.WriteLine("317 null move error");
+                //     return false;
+                // }
+                if(bestmve == null){
                     Console.WriteLine("317 null move error");
-                    return false;
+                    continue;
                 }
+                
 
                 if (mve.Value.wordScore > bestmve.Value.wordScore)
                 {
@@ -337,8 +342,10 @@ public class ScrabbleGame
 
         bool returnVal = SubmitAiGuess(bestbs.Value.tiles, bestmve.Value.word);
 
+        if (!returnVal){
+            boardSegList.Find(bestbs.Value).Value.moves.Remove(bestmve.Value);
+        }
 
-        boardSegList.Find(bestbs.Value).Value.moves.Remove(bestmve.Value);
         return returnVal;
     }
 
@@ -470,6 +477,7 @@ public class ScrabbleGame
                     {
                         Console.WriteLine("adding racktile " + rtle.GetLetter() + " to " + xVal + " , " + yVal);
                         rtle.AddToIncomingWord(board[xVal, yVal].boardSpot);
+                        break;
                     };
                 }
 
@@ -557,7 +565,7 @@ public class ScrabbleGame
 
 
                     //found a non blank letter
-                    while (board[i, j].GetLetter() != ' ' && j < board.GetLength(1))
+                    while ( i < board.GetLength(0) && j < board.GetLength(1) && board[i, j].GetLetter() != ' ')
                     {
                         addedSeg.tiles.AddLast(board[i, j]);
                         Console.WriteLine("261 J: " + j + " letter: " + board[i, j].GetLetter());
@@ -589,10 +597,10 @@ public class ScrabbleGame
 
 
                     //found a non blank letter
-                    while (board[i, j].GetLetter() != ' ' && i < board.GetLength(0))
+                    while ( i < board.GetLength(0) && j < board.GetLength(1) && board[i, j].GetLetter() != ' ')
                     {
                         addedSeg.tiles.AddLast(board[i, j]);
-                        Console.WriteLine("261 J: " + j + " letter: " + board[i, j].GetLetter());
+                        Console.WriteLine("602 J: " + j + " letter: " + board[i, j].GetLetter());
 
                         ++i;
                     }
